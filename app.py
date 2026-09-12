@@ -697,30 +697,25 @@ async def parent_consulter_bulletin(
             pub = db.query(SequencePublication).filter(
                 SequencePublication.ecole_id == school.id,
                 SequencePublication.sequence == sequence,
-                SequencePublication.est_publiee == True
+                SequencePublication.est_publie == True
             ).first()
 
             if not pub:
                 error_msg = f"Le bulletin de la Séquence {sequence} n'a pas encore été publié officiellement par l'administration."
             else:
-                # Calcul des données
+                # Calcul officiel MINESEC
                 data = calculate_sequence_bulletins(db, school.id, student.classe_id, sequence)
-                target_b = next((b for b in data["bulletins"] if b["student"]["id"] == student.id), None)
-                bulletin_data = {
-                    "student": student,
-                    "summary": target_b,
-                    "stats": data["stats"],
-                    "classe": data["classe"],
-                    "sequence": sequence
-                }
+                bulletin_data = next((b for b in data["bulletins"] if b["student"]["id"] == student.id), None)
 
     return render_template(request, "parent_portal.html", {
         "request": request,
         "school": school,
-        "resultat": bulletin_data,
-        "error_msg": error_msg,
-        "matricule_saisi": matricule_clean,
-        "sequence_saisie": sequence
+        "bulletin": bulletin_data,
+        "classe_nom": student.classroom.nom if student and student.classroom else "",
+        "sequence": sequence,
+        "error": error_msg,
+        "matricule": matricule_clean,
+        "date_naissance": date_naissance
     })
 
 # ==============================================================================
