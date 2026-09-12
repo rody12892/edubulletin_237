@@ -1,277 +1,474 @@
 <!DOCTYPE html>
-<html lang="fr" class="light">
+<html lang="fr" class="h-full bg-slate-950">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EDUBULLETIN 237 - Gestion Scolaire & Bulletins</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
+    <title>EDUBULLETIN 237 — Plateforme SaaS Scolaire MINESEC Cameroun</title>
+    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/lucide@latest"></script>
-    
     <script>
         tailwind.config = {
-            darkMode: 'class',
             theme: {
                 extend: {
-                    fontFamily: {
-                        sans: ['"Plus Jakarta Sans"', 'sans-serif'],
-                    },
                     colors: {
-                        brand: {
-                            50: '#eff6ff',
-                            100: '#dbeafe',
-                            500: '#3b82f6',
-                            600: '#2563eb',
-                            700: '#1d4ed8',
-                            900: '#1e3a8a',
-                            950: '#172554',
+                        minesec: {
+                            50: '#f0fdf4',
+                            100: '#dcfce7',
+                            500: '#22c55e',
+                            600: '#16a34a',
+                            700: '#15803d',
+                            800: '#166534',
+                            900: '#14532d'
                         }
                     }
                 }
             }
         }
     </script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
-        ::-webkit-scrollbar-track { background: transparent; }
-        ::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 3px; }
-        .dark ::-webkit-scrollbar-thumb { background: #3f3f46; }
-        .hidden-view { display: none !important; }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white !important; color: black !important; }
+        }
     </style>
 </head>
-<body class="bg-white dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100 font-sans antialiased min-h-screen flex flex-col selection:bg-brand-100 selection:text-brand-900 dark:selection:bg-brand-900/30 dark:selection:text-brand-100">
+<body class="h-full flex flex-col text-slate-100 antialiased selection:bg-emerald-500 selection:text-white">
 
-    <!-- Header Navigation -->
-    <header class="sticky top-0 z-40 w-full border-b border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-md">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-3 cursor-pointer" onclick="window.location.href='/'">
-                <div class="w-9 h-9 bg-brand-600 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-sm">
-                    237
-                </div>
-                <div>
-                    <span class="font-bold text-lg tracking-tight text-neutral-900 dark:text-white">EDUBULLETIN</span>
-                    <span class="text-xs text-brand-600 dark:text-brand-400 font-semibold ml-1 px-1.5 py-0.5 bg-brand-50 dark:bg-brand-900/30 rounded">SaaS Cameroun</span>
-                </div>
+    <!-- BARRE D'ÉTAT SUPÉRIEURE (SERVEUR & ACCÈS RAPIDES) -->
+    <header class="no-print bg-slate-900 border-b border-slate-800 text-xs py-2 px-4 shadow-md">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+            <div class="flex items-center space-x-3">
+                <span class="text-lg">🇨🇲</span>
+                <span class="font-bold tracking-wider text-emerald-400">EDUBULLETIN 237</span>
+                <span class="hidden md:inline-block px-2 py-0.5 rounded bg-emerald-950 text-emerald-400 border border-emerald-800/60">
+                    <i class="fa-solid fa-circle text-[8px] mr-1 animate-pulse"></i> 0.0.0.0:8080 Connecté
+                </span>
+                <span id="schoolNameBadge" class="text-slate-400 font-medium hidden sm:inline">Lycée Bilingue d'Excellence (LED)</span>
             </div>
-            <div class="flex items-center gap-4">
-                <button id="theme-toggle" class="p-2 text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-colors rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-900">
-                    <i data-lucide="moon" class="w-5 h-5 dark:hidden"></i>
-                    <i data-lucide="sun" class="w-5 h-5 hidden dark:block"></i>
+
+            <!-- Switch Démo Instantané 1-Clic -->
+            <div class="flex items-center space-x-2 flex-wrap">
+                <span class="text-slate-400 hidden lg:inline">Accès Test Immédiat :</span>
+                <a href="/demo/proviseur" class="bg-emerald-800/80 hover:bg-emerald-700 text-emerald-200 px-2.5 py-1 rounded border border-emerald-600/50 transition">
+                    <i class="fa-solid fa-user-tie mr-1"></i> Proviseur
+                </a>
+                <a href="/demo/secretaire" class="bg-blue-900/80 hover:bg-blue-800 text-blue-200 px-2.5 py-1 rounded border border-blue-600/50 transition">
+                    <i class="fa-solid fa-file-invoice mr-1"></i> Secrétariat
+                </a>
+                <a href="/demo/prof" class="bg-amber-900/80 hover:bg-amber-800 text-amber-200 px-2.5 py-1 rounded border border-amber-600/50 transition">
+                    <i class="fa-solid fa-chalkboard-user mr-1"></i> Professeur
+                </a>
+                <button onclick="app.openParentPortal()" class="bg-purple-900/80 hover:bg-purple-800 text-purple-200 px-2.5 py-1 rounded border border-purple-600/50 transition">
+                    <i class="fa-solid fa-users mr-1"></i> Espace Parent
                 </button>
-                <div id="user-menu" class="hidden items-center gap-3 border-l border-neutral-200 dark:border-neutral-800 pl-4">
-                    <span id="user-name-display" class="text-sm font-medium"></span>
-                    <button id="btn-logout" class="text-sm text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-colors">
-                        Déconnexion
-                    </button>
-                </div>
             </div>
         </div>
     </header>
 
-    <!-- Main Content -->
-    <main class="flex-grow flex flex-col w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- NAVIGATION PRINCIPALE -->
+    <nav class="no-print bg-slate-900/90 backdrop-blur border-b border-slate-800 sticky top-0 z-40">
+        <div class="max-w-7xl mx-auto px-4 flex items-center justify-between h-16">
+            <div class="flex items-center space-x-6">
+                <div class="flex items-center space-x-2">
+                    <div class="w-9 h-9 rounded-lg bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 font-black text-lg">
+                        237
+                    </div>
+                    <span class="font-black text-lg tracking-tight hidden sm:block">MINESEC <span class="text-emerald-400">PORTAL</span></span>
+                </div>
+                <div class="flex space-x-1 sm:space-x-2">
+                    <button onclick="app.showTab('dashboard')" id="tab-btn-dashboard" class="tab-btn px-3 py-2 rounded-lg font-medium text-sm text-emerald-400 bg-slate-800 border border-slate-700">
+                        <i class="fa-solid fa-gauge mr-1.5"></i> Synthèse
+                    </button>
+                    <button onclick="app.showTab('notes')" id="tab-btn-notes" class="tab-btn px-3 py-2 rounded-lg font-medium text-sm text-slate-300 hover:text-white hover:bg-slate-800">
+                        <i class="fa-solid fa-pen-to-square mr-1.5"></i> Notes Séquentielles
+                    </button>
+                    <button onclick="app.showTab('bulletins')" id="tab-btn-bulletins" class="tab-btn px-3 py-2 rounded-lg font-medium text-sm text-slate-300 hover:text-white hover:bg-slate-800">
+                        <i class="fa-solid fa-print mr-1.5"></i> Bulletins A4
+                    </button>
+                    <button onclick="app.showTab('paiements')" id="tab-btn-paiements" class="tab-btn px-3 py-2 rounded-lg font-medium text-sm text-amber-400 hover:bg-slate-800">
+                        <i class="fa-solid fa-mobile-screen-button mr-1.5"></i> Paiement MoMo
+                    </button>
+                </div>
+            </div>
+            <div class="flex items-center space-x-3">
+                <button onclick="app.openProfRegisterModal()" class="hidden md:inline-flex items-center space-x-1 text-xs bg-slate-800 hover:bg-slate-700 text-slate-300 px-3 py-2 rounded-lg border border-slate-700">
+                    <i class="fa-solid fa-user-plus"></i>
+                    <span>Inscription Enseignant</span>
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- CONTENU PRINCIPAL PAR ONGLET -->
+    <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6">
         
-        <!-- VIEW: LOGIN -->
-        <section id="view-login" class="flex-grow flex items-center justify-center py-12">
-            <div class="w-full max-w-md bg-white dark:bg-neutral-900 p-8 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-xl">
-                <div class="text-center mb-8">
-                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 mb-3">
-                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                        Plateforme en ligne - MINESEC / MINEDUB
-                    </div>
-                    <h1 class="text-2xl font-bold text-neutral-900 dark:text-white">Portail Scolaire 237</h1>
-                    <p class="text-sm text-neutral-600 dark:text-neutral-400 mt-2">Accédez à la gestion séquentielle ou consultez le bulletin de votre enfant.</p>
-                </div>
-                
-                <form id="login-form" class="space-y-4">
-                    <div>
-                        <label for="login-role" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Profil utilisateur</label>
-                        <select id="login-role" class="w-full bg-white dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 transition-colors">
-                            <option value="director">Directeur / Censeur (Administration)</option>
-                            <option value="parent">Parent d'élève (Consultation immédiate)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label for="login-id" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Identifiant (Code École ou Matricule)</label>
-                        <input type="text" id="login-id" required value="237-0014" class="w-full bg-white dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 transition-colors" placeholder="Ex: 237-0014 ou ECOLE-001">
-                    </div>
-                    <div>
-                        <label for="login-password" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Mot de passe / Code d'accès</label>
-                        <input type="password" id="login-password" required value="bulletin237" class="w-full bg-white dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 transition-colors" placeholder="••••••••">
-                    </div>
-                    <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-lg px-4 py-3 text-sm transition-all shadow-md hover:shadow flex justify-center items-center gap-2 mt-2">
-                        <span>Accéder à l'espace</span>
-                        <i data-lucide="arrow-right" class="w-4 h-4"></i>
-                    </button>
-                </form>
-            </div>
-        </section>
-
-        <!-- VIEW: DIRECTOR DASHBOARD -->
-        <section id="view-dashboard" class="hidden-view space-y-8">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <!-- ONGLET 1 : SYNTHÈSE / TABLEAU DE BORD PROVISEUR -->
+        <section id="tab-dashboard" class="space-y-6">
+            <div class="bg-gradient-to-r from-emerald-900/40 via-slate-900 to-slate-900 p-6 rounded-2xl border border-emerald-500/30 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
                 <div>
-                    <h1 class="text-2xl font-bold text-neutral-900 dark:text-white">Tableau de bord de l'établissement</h1>
-                    <p class="text-sm text-neutral-600 dark:text-neutral-400 mt-1">Collège Bilingue de l'Excellence 237 - Année 2023-2024</p>
+                    <span class="px-2.5 py-1 text-xs font-semibold rounded bg-emerald-500/20 text-emerald-400 border border-emerald-500/30 uppercase tracking-wide">Session 2025-2026</span>
+                    <h1 class="text-2xl font-bold mt-2">Gestion Académique & Évaluations MINESEC</h1>
+                    <p class="text-slate-400 text-sm mt-1">Calcul automatisé des 6 séquences, ventilation par groupes de matières et rangs ex æquo certifiés.</p>
                 </div>
-                <div class="flex items-center gap-3">
-                    <button id="btn-show-subscription" class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-900 dark:text-white font-medium rounded-lg px-4 py-2.5 text-sm transition-colors flex items-center gap-2 shadow-sm">
-                        <i data-lucide="credit-card" class="w-4 h-4 text-brand-600"></i>
-                        Abonnement Mobile Money
-                    </button>
-                    <button id="btn-generate-bulletins" class="bg-brand-600 hover:bg-brand-700 text-white font-medium rounded-lg px-4 py-2.5 text-sm transition-colors flex items-center gap-2 shadow-sm">
-                        <i data-lucide="file-text" class="w-4 h-4"></i>
-                        Calculer moyennes & rangs
+                <div class="flex items-center space-x-3">
+                    <button onclick="app.showTab('bulletins')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold text-sm px-4 py-2.5 rounded-xl shadow-lg shadow-emerald-900/40 transition flex items-center space-x-2">
+                        <i class="fa-solid fa-file-pdf"></i>
+                        <span>Tirer Bulletins Séquence 1</span>
                     </button>
                 </div>
             </div>
 
-            <!-- Stats Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
-                <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 shadow-sm">
-                    <div class="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Effectif total</div>
-                    <div class="mt-2 text-3xl font-bold text-neutral-900 dark:text-white" id="stat-students">45 élèves</div>
+            <!-- STATISTIQUES EN CARTES -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl">
+                    <div class="flex justify-between items-center text-slate-400 text-sm">
+                        <span>Élèves Inscrits</span>
+                        <i class="fa-solid fa-user-graduate text-emerald-400"></i>
+                    </div>
+                    <div id="statEleves" class="text-2xl font-black mt-2 text-white">5</div>
+                    <span class="text-xs text-emerald-400">Effectif certifié</span>
                 </div>
-                <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 shadow-sm">
-                    <div class="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Classes actives</div>
-                    <div class="mt-2 text-3xl font-bold text-neutral-900 dark:text-white" id="stat-classes">3ème A, 4ème, 6ème</div>
+                <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl">
+                    <div class="flex justify-between items-center text-slate-400 text-sm">
+                        <span>Classes Ouvertes</span>
+                        <i class="fa-solid fa-door-open text-blue-400"></i>
+                    </div>
+                    <div id="statClasses" class="text-2xl font-black mt-2 text-white">3</div>
+                    <span class="text-xs text-blue-400">6ème A, 3ème B, Tle C</span>
                 </div>
-                <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 shadow-sm">
-                    <div class="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Séquence en cours</div>
-                    <div class="mt-2 text-3xl font-bold text-brand-600 dark:text-brand-400" id="stat-sequence">Séquence 3 (Trimestre 2)</div>
+                <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl">
+                    <div class="flex justify-between items-center text-slate-400 text-sm">
+                        <span>Moyenne Générale</span>
+                        <i class="fa-solid fa-chart-line text-amber-400"></i>
+                    </div>
+                    <div id="statMoyenne" class="text-2xl font-black mt-2 text-white">13.45 / 20</div>
+                    <span class="text-xs text-amber-400">Séquence 1 validée</span>
+                </div>
+                <div class="bg-slate-900 border border-slate-800 p-4 rounded-xl">
+                    <div class="flex justify-between items-center text-slate-400 text-sm">
+                        <span>Licence Établissement</span>
+                        <i class="fa-solid fa-shield-check text-purple-400"></i>
+                    </div>
+                    <div class="text-2xl font-black mt-2 text-emerald-400">ACTIF</div>
+                    <span class="text-xs text-purple-400">Pack Standard (Monetbil)</span>
                 </div>
             </div>
 
-            <!-- Grade Entry Interface -->
-            <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
-                <div class="p-4 border-b border-neutral-200 dark:border-neutral-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-neutral-50/70 dark:bg-neutral-900/70">
-                    <div>
-                        <h2 class="text-base font-semibold text-neutral-900 dark:text-white">Grille séquentielle de saisie des notes</h2>
-                        <p class="text-xs text-neutral-500">Conforme au barème officiel de 0 à 20</p>
-                    </div>
-                    <div class="flex items-center gap-3">
-                        <button id="btn-save-grades" class="bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-200 font-semibold rounded-lg px-4 py-2 text-sm transition-colors flex items-center gap-2">
-                            <i data-lucide="save" class="w-4 h-4"></i>
-                            Enregistrer les notes
-                        </button>
-                    </div>
+            <!-- LISTE DES ÉLÈVES & EFFECTIF -->
+            <div class="bg-slate-900 border border-slate-800 rounded-2xl overflow-hidden">
+                <div class="p-4 border-b border-slate-800 flex justify-between items-center">
+                    <h3 class="font-bold text-base flex items-center space-x-2">
+                        <i class="fa-solid fa-address-book text-emerald-400"></i>
+                        <span>Élèves Inscrits (Classe Pilote : 3ème B)</span>
+                    </h3>
+                    <span class="text-xs bg-slate-800 text-slate-300 px-2.5 py-1 rounded">Norme MINESEC 237</span>
                 </div>
                 <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left whitespace-nowrap">
-                        <thead class="bg-neutral-100 dark:bg-neutral-950 border-b border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 font-semibold">
+                    <table class="w-full text-left text-sm text-slate-300">
+                        <thead class="bg-slate-950/60 text-xs uppercase text-slate-400">
                             <tr>
-                                <th class="px-4 py-3 w-64">Nom et Prénom de l'élève</th>
-                                <th class="px-3 py-3 w-24 text-center">Seq 1</th>
-                                <th class="px-3 py-3 w-24 text-center">Seq 2</th>
-                                <th class="px-3 py-3 w-24 text-center">Seq 3</th>
-                                <th class="px-3 py-3 w-24 text-center">Seq 4</th>
-                                <th class="px-3 py-3 w-24 text-center">Seq 5</th>
-                                <th class="px-3 py-3 w-24 text-center">Seq 6</th>
-                                <th class="px-4 py-3 w-24 text-center text-brand-600 dark:text-brand-400 font-bold">Moyenne</th>
+                                <th class="p-3.5">Matricule</th>
+                                <th class="p-3.5">Nom & Prénom</th>
+                                <th class="p-3.5">Sexe</th>
+                                <th class="p-3.5">Classe</th>
+                                <th class="p-3.5">Parent Contact</th>
+                                <th class="p-3.5 text-right">Actions</th>
                             </tr>
                         </thead>
-                        <tbody id="grades-tbody" class="divide-y divide-neutral-200 dark:divide-neutral-800">
-                            <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/40 transition-colors">
-                                <td class="px-4 py-3 font-semibold text-neutral-900 dark:text-white">ABANDA Jean (3ème A)</td>
-                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="14.5" class="grade-input w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 focus:border-brand-500 rounded px-2 py-1 text-center outline-none"></td>
-                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="15.0" class="grade-input w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 focus:border-brand-500 rounded px-2 py-1 text-center outline-none"></td>
-                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="13.0" class="grade-input w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 focus:border-brand-500 rounded px-2 py-1 text-center outline-none"></td>
-                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="14.0" class="grade-input w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 focus:border-brand-500 rounded px-2 py-1 text-center outline-none"></td>
-                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="16.0" class="grade-input w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 focus:border-brand-500 rounded px-2 py-1 text-center outline-none"></td>
-                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="14.0" class="grade-input w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 focus:border-brand-500 rounded px-2 py-1 text-center outline-none"></td>
-                                <td class="px-4 py-3 text-center font-bold text-brand-600 dark:text-brand-400 row-average">14.42</td>
-                            </tr>
-                            <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/40 transition-colors">
-                                <td class="px-4 py-3 font-semibold text-neutral-900 dark:text-white">BILO'O Marie (3ème A)</td>
-                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="11.0" class="grade-input w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 focus:border-brand-500 rounded px-2 py-1 text-center outline-none"></td>
-                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="12.5" class="grade-input w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 focus:border-brand-500 rounded px-2 py-1 text-center outline-none"></td>
-                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="10.0" class="grade-input w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 focus:border-brand-500 rounded px-2 py-1 text-center outline-none"></td>
-                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="13.0" class="grade-input w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 focus:border-brand-500 rounded px-2 py-1 text-center outline-none"></td>
-                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="12.0" class="grade-input w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 focus:border-brand-500 rounded px-2 py-1 text-center outline-none"></td>
-                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="11.5" class="grade-input w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 focus:border-brand-500 rounded px-2 py-1 text-center outline-none"></td>
-                                <td class="px-4 py-3 text-center font-bold text-brand-600 dark:text-brand-400 row-average">11.67</td>
-                            </tr>
+                        <tbody id="elevesTableBody" class="divide-y divide-slate-800/60">
+                            <!-- Injecté par JavaScript -->
                         </tbody>
                     </table>
                 </div>
             </div>
         </section>
 
-        <!-- VIEW: PARENT PORTAL -->
-        <section id="view-parent" class="hidden-view space-y-8">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                <div>
-                    <h1 class="text-2xl font-bold text-neutral-900 dark:text-white">Portail Parent</h1>
-                    <p class="text-sm text-neutral-600 dark:text-neutral-400 mt-1">Consultation certifiée du bulletin scolaire</p>
+        <!-- ONGLET 2 : SAISIE DES NOTES SÉQUENTIELLES -->
+        <section id="tab-notes" class="hidden space-y-6">
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl">
+                <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                    <div>
+                        <h2 class="text-xl font-bold flex items-center space-x-2">
+                            <i class="fa-solid fa-pen-ruler text-emerald-400"></i>
+                            <span>Saisie Sécurisée des Notes Séquentielles</span>
+                        </h2>
+                        <p class="text-slate-400 text-sm mt-1">Saisie au 1/4 de point (0.25) ou marquage d'absence (ABS) selon la réglementation MINESEC.</p>
+                    </div>
+                    <div class="flex items-center space-x-3">
+                        <select id="selectClasseNote" class="bg-slate-800 border border-slate-700 text-sm rounded-lg px-3 py-2 text-white">
+                            <option value="1">3ème B (Allemand)</option>
+                            <option value="2">6ème A</option>
+                            <option value="3">Terminale C</option>
+                        </select>
+                        <select id="selectSequenceNote" class="bg-slate-800 border border-slate-700 text-sm rounded-lg px-3 py-2 text-white">
+                            <option value="1">Séquence 1 (Validée)</option>
+                            <option value="2" selected>Séquence 2 (En cours)</option>
+                            <option value="3">Séquence 3</option>
+                        </select>
+                    </div>
                 </div>
-                <button onclick="window.print()" class="bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-lg px-4 py-2.5 text-sm transition-colors flex items-center gap-2 shadow-sm w-fit">
-                    <i data-lucide="download" class="w-4 h-4"></i>
-                    Imprimer / Télécharger le bulletin officiel
-                </button>
+
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-sm text-slate-300">
+                        <thead class="bg-slate-950/60 text-xs uppercase text-slate-400">
+                            <tr>
+                                <th class="p-3.5">Matricule</th>
+                                <th class="p-3.5">Nom de l'élève</th>
+                                <th class="p-3.5 text-center">Mathématiques (Coeff 4)</th>
+                                <th class="p-3.5 text-center">Français (Coeff 5)</th>
+                                <th class="p-3.5 text-center">Moyenne Provisoire</th>
+                                <th class="p-3.5 text-right">Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody id="grilleNotesBody" class="divide-y divide-slate-800/60">
+                            <!-- Rempli dynamiquement -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="mt-6 flex justify-end space-x-3">
+                    <button onclick="alert('Brouillon sauvegardé avec succès en base de données locale.')" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-2 rounded-xl text-sm border border-slate-700">
+                        Sauvegarder Brouillon
+                    </button>
+                    <button onclick="alert('Grille soumise au Proviseur pour validation formelle.')" class="bg-emerald-600 hover:bg-emerald-500 text-white font-semibold px-5 py-2 rounded-xl text-sm shadow-lg shadow-emerald-900/30">
+                        Soumettre pour Validation
+                    </button>
+                </div>
+            </div>
+        </section>
+
+        <!-- ONGLET 3 : BULLETIN SCOLAIRE OFFICIEL A4 MINESEC -->
+        <section id="tab-bulletins" class="hidden space-y-6">
+            <div class="no-print bg-slate-900 border border-slate-800 p-4 rounded-xl flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-center space-x-3">
+                    <label class="text-sm text-slate-400">Sélectionner un élève :</label>
+                    <select id="selectBulletinEleve" onchange="app.loadBulletin(this.value, 1)" class="bg-slate-800 border border-slate-700 text-sm rounded-lg px-3 py-2 text-white">
+                        <option value="LED260001">LED260001 - ABANDA Jean-Pierre</option>
+                        <option value="LED260002">LED260002 - BILO'O Marie-Claire</option>
+                        <option value="LED260003">LED260003 - DJOMO Christian</option>
+                        <option value="LED260004">LED260004 - FOTSO Kévine Audrey</option>
+                        <option value="LED260005">LED260005 - MBARGA Alain Stéphane</option>
+                    </select>
+                </div>
+                <div class="flex space-x-2">
+                    <button onclick="window.print()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2 rounded-lg text-sm font-semibold flex items-center space-x-2">
+                        <i class="fa-solid fa-print"></i>
+                        <span>Imprimer le Bulletin (A4)</span>
+                    </button>
+                </div>
             </div>
 
-            <div id="resultats-bulletin"></div>
+            <!-- CONTENEUR DU BULLETIN OFFICIEL A4 (OPTIMISÉ ÉCRAN & IMPRESSION) -->
+            <div id="bulletinContainer" class="bg-white text-black p-8 rounded-2xl shadow-2xl max-w-4xl mx-auto border border-slate-300 font-sans">
+                <!-- En-tête MINESEC Officiel -->
+                <div class="flex justify-between items-start border-b-2 border-black pb-4 text-[11px] leading-tight text-center font-bold uppercase">
+                    <div class="w-5/12">
+                        <p>RÉPUBLIQUE DU CAMEROUN</p>
+                        <p class="font-normal italic normal-case text-[10px]">Paix - Travail - Patrie</p>
+                        <p class="mt-1">MINISTÈRE DES ENSEIGNEMENTS SECONDAIRES</p>
+                        <p>DÉLÉGATION RÉGIONALE DU LITTORAL</p>
+                    </div>
+                    <div class="w-2/12 flex flex-col items-center justify-center">
+                        <div class="w-14 h-14 border-2 border-emerald-800 rounded-full flex items-center justify-center font-black text-emerald-900 text-xl">
+                            LED
+                        </div>
+                        <span class="text-[9px] mt-1 font-bold text-slate-800">2025 - 2026</span>
+                    </div>
+                    <div class="w-5/12">
+                        <p>REPUBLIC OF CAMEROON</p>
+                        <p class="font-normal italic normal-case text-[10px]">Peace - Work - Fatherland</p>
+                        <p class="mt-1">MINISTRY OF SECONDARY EDUCATION</p>
+                        <p>REGIONAL DELEGATION FOR THE LITTORAL</p>
+                    </div>
+                </div>
+
+                <div class="text-center mt-3">
+                    <h2 class="text-lg font-black uppercase tracking-wide text-slate-900">LYCÉE BILINGUE D'EXCELLENCE DE DOUALA</h2>
+                    <p class="text-xs font-semibold text-slate-600">B.P. 1045 Douala - Tél: (+237) 699 00 11 22</p>
+                    <div class="inline-block mt-1 px-4 py-1 bg-slate-900 text-white font-black text-xs uppercase tracking-wider rounded">
+                        BULLETIN DE NOTES DU 1er TRIMESTRE — SÉQUENCE 1
+                    </div>
+                </div>
+
+                <!-- Coordonnées Élève -->
+                <div class="mt-4 grid grid-cols-2 gap-2 text-xs border border-black p-3 bg-slate-50 font-medium">
+                    <div><span class="font-bold">Nom & Prénom :</span> <span id="bulNom">ABANDA Jean-Pierre</span></div>
+                    <div><span class="font-bold">Matricule :</span> <span id="bulMatricule" class="font-mono font-bold">LED260001</span></div>
+                    <div><span class="font-bold">Classe :</span> <span id="bulClasse">3ème B (Allemand)</span></div>
+                    <div><span class="font-bold">Date de Naissance :</span> <span id="bulDateNais">14/03/2010</span> (Sexe: <span id="bulSexe">M</span>)</div>
+                </div>
+
+                <!-- Grille des Notes par Groupes MINESEC -->
+                <div class="mt-4 overflow-x-auto">
+                    <table class="w-full text-[11px] border-collapse border border-black text-center">
+                        <thead class="bg-slate-200 font-bold">
+                            <tr class="border-b border-black">
+                                <th class="border border-black p-1.5 text-left">Matière & Enseignant</th>
+                                <th class="border border-black p-1.5 w-16">Note /20</th>
+                                <th class="border border-black p-1.5 w-14">Coeff</th>
+                                <th class="border border-black p-1.5 w-16">Total N×C</th>
+                                <th class="border border-black p-1.5">Appréciation & Visa</th>
+                            </tr>
+                        </thead>
+                        <tbody id="bulletinRows">
+                            <!-- Injecté par script -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Récapitulatif & Rangs -->
+                <div class="mt-4 grid grid-cols-3 gap-2 text-[11px] border border-black p-3 bg-slate-50 font-semibold">
+                    <div class="text-center">
+                        <p class="text-slate-600 font-normal">Total des Points</p>
+                        <p id="bulTotalPoints" class="text-sm font-black text-black">142.50 / 180</p>
+                    </div>
+                    <div class="text-center border-x border-black">
+                        <p class="text-slate-600 font-normal">Moyenne Générale</p>
+                        <p id="bulMoyenne" class="text-base font-black text-emerald-800">15.83 / 20</p>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-slate-600 font-normal">Rang dans la Classe</p>
+                        <p id="bulRang" class="text-sm font-black text-black">1er sur 45</p>
+                    </div>
+                </div>
+
+                <!-- Visas et Signatures -->
+                <div class="mt-6 grid grid-cols-3 gap-4 text-[10px] text-center font-bold">
+                    <div>
+                        <p>Le Titulaire de Classe</p>
+                        <div class="h-12 flex items-center justify-center italic text-slate-500 font-normal">M. KAMGA Paul</div>
+                    </div>
+                    <div>
+                        <p>Les Parents / Tuteurs</p>
+                        <div class="h-12 flex items-center justify-center italic text-slate-400 font-normal">Visa obligatoire</div>
+                    </div>
+                    <div>
+                        <p>Le Chef d'Établissement (Proviseur)</p>
+                        <div class="h-12 flex items-center justify-center font-black text-emerald-950">
+                            Dr. ETOUNDI Joseph
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ONGLET 4 : PASSERELLE MOBILE MONEY (MONETBIL FCFA) -->
+        <section id="tab-paiements" class="hidden space-y-6">
+            <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl max-w-3xl mx-auto">
+                <div class="text-center mb-6">
+                    <span class="px-3 py-1 text-xs font-bold rounded-full bg-amber-500/20 text-amber-400 border border-amber-500/40 uppercase">
+                        Passerelle Officielle Cameroun
+                    </span>
+                    <h2 class="text-2xl font-black mt-3">Abonnement & Licence EDUBULLETIN 237</h2>
+                    <p class="text-slate-400 text-sm mt-1">Règlement direct par MTN Mobile Money ou Orange Money en FCFA via Monetbil.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                    <div class="border-2 border-emerald-500 bg-emerald-950/20 p-4 rounded-xl cursor-pointer">
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <span class="text-xs font-bold text-emerald-400 uppercase">Pack Standard</span>
+                                <h3 class="text-xl font-black mt-1 text-white">150.000 FCFA <span class="text-xs font-normal text-slate-400">/ an</span></h3>
+                            </div>
+                            <span class="text-xs bg-emerald-500 text-white font-bold px-2 py-0.5 rounded">Actuel</span>
+                        </div>
+                        <p class="text-xs text-slate-300 mt-2">Jusqu'à 15 classes (Lycées et Collèges de taille moyenne).</p>
+                    </div>
+
+                    <div class="border border-slate-700 bg-slate-800/40 p-4 rounded-xl cursor-pointer hover:border-slate-500 transition">
+                        <div>
+                            <span class="text-xs font-bold text-slate-400 uppercase">Pack Grand</span>
+                            <h3 class="text-xl font-black mt-1 text-white">250.000 FCFA <span class="text-xs font-normal text-slate-400">/ an</span></h3>
+                        </div>
+                        <p class="text-xs text-slate-300 mt-2">De 16 à 30 classes (Grands complexes scolaires bilingues).</p>
+                    </div>
+                </div>
+
+                <!-- Formulaire de Paiement -->
+                <form id="paymentForm" onsubmit="app.handlePaymentSubmit(event)" class="space-y-4 bg-slate-950/60 p-5 rounded-xl border border-slate-800">
+                    <div>
+                        <label class="block text-xs font-medium text-slate-300 mb-1">Numéro de Téléphone Mobile Money (MTN MoMo ou Orange Money) :</label>
+                        <div class="relative">
+                            <span class="absolute left-3 top-2.5 text-slate-500 text-sm font-bold">+237</span>
+                            <input type="tel" id="payPhone" required placeholder="699001122" class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-14 pr-3 py-2 text-white text-sm focus:border-emerald-500 focus:outline-none">
+                        </div>
+                        <span class="text-[11px] text-slate-500 mt-1 block">Composez votre numéro à 9 chiffres (ex: 699001122 ou 677112233).</span>
+                    </div>
+                    <button type="submit" id="btnPaySubmit" class="w-full bg-amber-500 hover:bg-amber-400 text-slate-950 font-black py-3 rounded-xl transition shadow-lg shadow-amber-900/30 flex items-center justify-center space-x-2">
+                        <i class="fa-solid fa-lock"></i>
+                        <span>Payer 150.000 FCFA via Monetbil</span>
+                    </button>
+                </form>
+            </div>
         </section>
 
     </main>
 
-    <!-- MODAL: SUBSCRIPTION (MOBILE MONEY) -->
-    <div id="modal-subscription" class="fixed inset-0 z-50 hidden items-center justify-center">
-        <div class="absolute inset-0 bg-neutral-900/60 backdrop-blur-sm" id="modal-backdrop"></div>
-        <div class="relative w-full max-w-md bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-2xl p-6 m-4 transform transition-all">
-            <div class="flex items-center justify-between mb-4">
-                <div class="flex items-center gap-2">
-                    <div class="w-7 h-7 bg-green-500/10 text-green-600 rounded flex items-center justify-center font-bold text-xs">237</div>
-                    <h3 class="text-lg font-bold text-neutral-900 dark:text-white">Paiement Mobile Money</h3>
-                </div>
-                <button id="btn-close-modal" class="text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
-                    <i data-lucide="x" class="w-5 h-5"></i>
-                </button>
+    <!-- MODALE PORTAIL PARENT EN 1 CLIC -->
+    <div id="parentModal" class="no-print fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 text-center shadow-2xl">
+            <div class="w-12 h-12 bg-purple-900/50 text-purple-400 rounded-xl flex items-center justify-center mx-auto text-xl mb-3 border border-purple-700/50">
+                <i class="fa-solid fa-graduation-cap"></i>
             </div>
-            
-            <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-6">Abonnement annuel ou règlement de scolarité via MTN MoMo et Orange Money Cameroun.</p>
-            
-            <div class="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-4 flex justify-between items-center mb-6">
-                <span class="font-medium text-neutral-900 dark:text-white">Montant forfaitaire</span>
-                <span class="text-xl font-bold text-brand-600 dark:text-brand-400">75 000 FCFA</span>
+            <h3 class="text-lg font-bold text-white">Portail Parents d'Élèves</h3>
+            <p class="text-slate-400 text-xs mt-1">Consultez le relevé de notes officiel sans mot de passe en renseignant le matricule MINESEC.</p>
+            <div class="mt-4 text-left">
+                <label class="block text-xs font-medium text-slate-300 mb-1">Matricule de l'élève :</label>
+                <input type="text" id="parentMatricule" value="LED260001" class="w-full bg-slate-800 border border-slate-700 rounded-lg px-3 py-2 text-white font-mono uppercase text-sm focus:border-purple-500 focus:outline-none">
             </div>
+            <div class="mt-5 flex space-x-3">
+                <button onclick="document.getElementById('parentModal').classList.add('hidden')" class="w-1/2 bg-slate-800 hover:bg-slate-700 text-slate-300 py-2 rounded-xl text-sm font-medium">Annuler</button>
+                <button onclick="app.searchParentBulletin()" class="w-1/2 bg-purple-600 hover:bg-purple-500 text-white py-2 rounded-xl text-sm font-bold shadow-lg shadow-purple-900/40">Afficher Bulletin</button>
+            </div>
+        </div>
+    </div>
 
-            <form id="modal-payment-form" class="space-y-4">
+    <!-- MODALE INSCRIPTION PROFESSEUR -->
+    <div id="profModal" class="no-print fixed inset-0 z-50 bg-black/80 backdrop-blur-sm hidden flex items-center justify-center p-4">
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-bold text-white flex items-center space-x-2">
+                    <i class="fa-solid fa-chalkboard-user text-emerald-400"></i>
+                    <span>Inscription Enseignant</span>
+                </h3>
+                <button onclick="document.getElementById('profModal').classList.add('hidden')" class="text-slate-500 hover:text-white">&times;</button>
+            </div>
+            <form onsubmit="app.handleProfRegister(event)" class="space-y-3">
                 <div>
-                    <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">Réseau Mobile</label>
-                    <div class="grid grid-cols-2 gap-3">
-                        <label class="relative flex items-center justify-center p-3 border border-neutral-200 dark:border-neutral-800 rounded-xl cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 dark:has-[:checked]:bg-brand-900/20">
-                            <input type="radio" name="operator" value="orange" class="sr-only" checked>
-                            <span class="text-sm font-semibold text-orange-600 dark:text-orange-400">Orange Money</span>
-                        </label>
-                        <label class="relative flex items-center justify-center p-3 border border-neutral-200 dark:border-neutral-800 rounded-xl cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 dark:has-[:checked]:bg-brand-900/20">
-                            <input type="radio" name="operator" value="mtn" class="sr-only">
-                            <span class="text-sm font-semibold text-yellow-600 dark:text-yellow-400">MTN MoMo</span>
-                        </label>
-                    </div>
+                    <label class="block text-xs text-slate-300 mb-1">Nom & Prénom</label>
+                    <input type="text" id="regNom" required placeholder="M. MVONDO André" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-white text-sm">
                 </div>
-                
                 <div>
-                    <label for="momo-phone-number" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Numéro de téléphone (+237)</label>
-                    <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-neutral-500 text-sm font-semibold">+237</span>
-                        <input type="tel" id="momo-phone-number" required pattern="[6][0-9]{8}" value="699001122" class="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-lg pl-14 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 transition-colors" placeholder="6XX XX XX XX">
-                    </div>
+                    <label class="block text-xs text-slate-300 mb-1">Numéro de Téléphone (+237)</label>
+                    <input type="tel" id="regTel" required placeholder="+237699112233" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-white text-sm">
                 </div>
-
-                <button type="submit" id="btn-confirm-payment" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-lg px-4 py-3 text-sm transition-colors flex justify-center items-center gap-2 mt-4 shadow-md">
-                    <i data-lucide="lock" class="w-4 h-4"></i>
-                    <span>Valider et Payer 75 000 FCFA</span>
+                <div>
+                    <label class="block text-xs text-slate-300 mb-1">Matière Enseignée</label>
+                    <input type="text" id="regMat" required placeholder="Histoire-Géographie" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-white text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs text-slate-300 mb-1">Mot de Passe</label>
+                    <input type="password" id="regPass" required placeholder="••••••••" class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-white text-sm">
+                </div>
+                <button type="submit" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-2.5 rounded-lg text-sm mt-2">
+                    Soumettre au Proviseur
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- Scripts Applicatifs -->
+    <!-- PIED DE PAGE -->
+    <footer class="no-print bg-slate-900 border-t border-slate-800 py-4 px-6 text-xs text-slate-500 mt-auto">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-2">
+            <p>© 2026 EDUBULLETIN 237 — Conforme aux Directives Officielles MINESEC du Cameroun.</p>
+            <p class="text-emerald-400 font-mono">Serveur Actif : 0.0.0.0:8080</p>
+        </div>
+    </footer>
+
+    <!-- LOGIQUE CLIENT APPLICATIVE STATIQUE / SECONDAIRE -->
     <script src="/static/app.js"></script>
 </body>
 </html>
