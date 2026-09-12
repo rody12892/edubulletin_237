@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bulletin Officiel - {{ student.nom_complet }} - Séquence {{ sequence_num }}</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            body {
+                background: white;
+                color: black;
+                font-size: 11pt;
+                padding: 0;
+                margin: 0;
+            }
+            .no-print {
+                display: none !important;
+            }
+            .page-break {
+                page-break-after: always;
+            }
+            .bulletin-container {
+                border: 2px solid #000;
+                box-shadow: none !important;
+                margin: 0 !important;
+                width: 100% !important;
+                max-width: 100% !important;
+                padding: 15px !important;
+            }
+            table {
+                font-size: 9.5pt;
+            }
+            th, td {
+                border-color: #000 !important;
+            }
+        }
+        @page {
+            size: A4 portrait;
+            margin: 8mm;
+        }
+    </style>
+</head>
+<body class="bg-slate-100 text-slate-800 p-4 min-h-screen">
+
+    <!-- Boutons d'actions barre supérieure (masqués à l'impression) -->
+    <div class="max-w-4xl mx-auto mb-4 flex justify-between items-center no-print">
+        <a href="javascript:history.back()" class="px-4 py-2 bg-slate-700 text-white rounded-lg text-sm font-semibold hover:bg-slate-800 transition">
+            ← Retour
+        </a>
+        <div class="flex space-x-3">
+            <button onclick="window.print()" class="px-5 py-2 bg-emerald-600 text-white rounded-lg text-sm font-bold shadow hover:bg-emerald-700 transition flex items-center gap-2">
+                🖨️ Imprimer le Bulletin (A4)
+            </button>
+        </div>
+    </div>
+
+    <!-- Bulletin Container A4 -->
+    <div class="max-w-4xl mx-auto bg-white p-6 shadow-xl rounded-lg border border-slate-300 bulletin-container">
+        
+        <!-- En-tête officiel République du Cameroun / MINESEC -->
+        <div class="grid grid-cols-3 text-center text-xs font-semibold uppercase tracking-wider pb-3 border-b-2 border-slate-900 mb-4">
+            <div class="space-y-0.5">
+                <p>RÉPUBLIQUE DU CAMEROUN</p>
+                <p class="text-[10px] text-slate-500">Paix - Travail - Patrie</p>
+                <p class="mt-1">MINISTÈRE DES ENSEIGNEMENTS SECONDAIRES</p>
+                <p class="font-bold text-slate-900">{{ school.nom }}</p>
+                <p class="text-[10px] text-slate-600">BP: {{ school.adresse or 'Cameroun' }}</p>
+            </div>
+            <div class="flex flex-col items-center justify-center">
+                <!-- Armoiries / Logo -->
+                <div class="w-16 h-16 rounded-full border-2 border-slate-900 flex items-center justify-center font-bold text-lg bg-emerald-50 text-emerald-800">
+                    237
+                </div>
+                <div class="mt-2 text-[10px] font-bold text-emerald-800 tracking-widest">
+                    BULLETIN DE NOTES OFFICIEL
+                </div>
+                <div class="text-[11px] font-black text-slate-900 mt-0.5">
+                    SÉQUENCE {{ sequence_num }} / 6
+                </div>
+                <div class="text-[10px] text-slate-600">
+                    Année Scolaire : {{ school.annee_scolaire }}
+                </div>
+            </div>
+            <div class="space-y-0.5">
+                <p>REPUBLIC OF CAMEROON</p>
+                <p class="text-[10px] text-slate-500">Peace - Work - Fatherland</p>
+                <p class="mt-1">MINISTRY OF SECONDARY EDUCATION</p>
+                <p class="font-bold text-slate-900">{{ school.nom }}</p>
+                <p class="text-[10px] text-slate-600">Tél: {{ school.telephone or '+237' }}</p>
+            </div>
+        </div>
+
+        <!-- Informations de l'élève & classe -->
+        <div class="grid grid-cols-2 gap-4 bg-slate-50 p-3 rounded border border-slate-300 text-xs mb-4">
+            <div>
+                <p><span class="font-bold text-slate-700">Nom & Prénom(s) :</span> <span class="font-black text-slate-900 text-sm uppercase">{{ student.nom_complet }}</span></p>
+                <p><span class="font-bold text-slate-700">Matricule :</span> <span class="font-mono font-bold text-emerald-800">{{ student.matricule }}</span></p>
+                <p><span class="font-bold text-slate-700">Date & Lieu de Naissance :</span> {{ student.date_naissance or 'N/A' }} {{ '(' + student.lieu_naissance + ')' if student.lieu_naissance else '' }}</p>
+                <p><span class="font-bold text-slate-700">Sexe :</span> {{ student.sexe or 'Non précisé' }}</p>
+            </div>
+            <div>
+                <p><span class="font-bold text-slate-700">Classe :</span> <span class="font-bold text-slate-900 text-sm">{{ classroom.nom }}</span></p>
+                <p><span class="font-bold text-slate-700">Effectif de la classe :</span> {{ class_stats.effectif }} élèves</p>
+                <p><span class="font-bold text-slate-700">Professeur Principal :</span> {{ classroom.prof_principal_nom or 'Non assigné' }}</p>
+                <p><span class="font-bold text-slate-700">Date d'édition :</span> {{ today_date }}</p>
+            </div>
+        </div>
+
+        <!-- Tableau des Notes par Groupes MINESEC -->
+        <div class="overflow-x-auto mb-4">
+            <table class="w-full text-xs text-left border-collapse border border-slate-400">
+                <thead>
+                    <tr class="bg-slate-800 text-white text-center font-bold">
+                        <th class="border border-slate-400 px-2 py-1.5 text-left w-1/3">Matières & Enseignants</th>
+                        <th class="border border-slate-400 px-1 py-1.5 w-12">Note /20</th>
+                        <th class="border border-slate-400 px-1 py-1.5 w-10">Coeff</th>
+                        <th class="border border-slate-400 px-1 py-1.5 w-12">Total</th>
+                        <th class="border border-slate-400 px-1 py-1.5 w-12">Moy Cl.</th>
+                        <th class="border border-slate-400 px-2 py-1.5 w-24">Appréciation</th>
+                        <th class="border border-slate-400 px-2 py-1.5 w-24">Signature</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for group_name, subjects in grouped_results.items() %}
+                        <!-- En-tête de Groupe -->
+                        <tr class="bg-slate-200 font-black text-slate-800 uppercase tracking-wide">
+                            <td colspan="7" class="border border-slate-400 px-2 py-1 text-[11px]">
+                                {{ group_name }}
+                            </td>
+                        </tr>
+                        {% for item in subjects %}
+                        <tr class="border-b border-slate-300 hover:bg-slate-50">
+                            <td class="border border-slate-400 px-2 py-1 font-semibold text-slate-800">
+                                {{ item.nom or item.matiere_nom }}
+                                <div class="text-[10px] text-slate-500 font-normal">M./Mme {{ item.prof or item.enseignant_nom or 'Enseignant' }}</div>
+                            </td>
+                            <td class="border border-slate-400 px-1 py-1 text-center font-mono font-bold {{ 'text-red-600' if item.note is not none and item.note < 10 else 'text-slate-900' }}">
+                                {% if item.note is not none %}
+                                    {{ "%.2f"|format(item.note) }}
+                                {% else %}
+                                    <span class="text-slate-400 italic">ABS</span>
+                                {% endif %}
+                            </td>
+                            <td class="border border-slate-400 px-1 py-1 text-center font-bold text-slate-700">
+                                {{ item.coeff }}
+                            </td>
+                            <td class="border border-slate-400 px-1 py-1 text-center font-mono font-bold text-slate-900">
+                                {% if item.points is defined and item.points is not none %}
+                                    {{ "%.2f"|format(item.points) }}
+                                {% elif item.total_points is defined and item.total_points is not none %}
+                                    {{ "%.2f"|format(item.total_points) }}
+                                {% else %}
+                                    -
+                                {% endif %}
+                            </td>
+                            <td class="border border-slate-400 px-1 py-1 text-center text-slate-600 font-mono">
+                                {{ "%.2f"|format(item.moyenne_classe) if (item.moyenne_classe is defined and item.moyenne_classe) else '-' }}
+                            </td>
+                            <td class="border border-slate-400 px-2 py-1 text-center text-[10px] font-semibold {{ 'text-red-600 font-bold' if 'Non' in item.appreciation or 'Médiocre' in item.appreciation else 'text-emerald-700' }}">
+                                {{ item.appreciation }}
+                            </td>
+                            <td class="border border-slate-400 px-2 py-1 text-center">
+                                <span class="text-[9px] text-slate-300">Vu</span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- Récapitulatif et Moyenne de l'élève -->
+        <div class="grid grid-cols-3 gap-3 mb-4">
+            
+            <!-- Bilan de l'élève -->
+            <div class="border-2 border-slate-900 rounded p-2.5 bg-emerald-50/50 flex flex-col justify-between">
+                <div>
+                    <h4 class="text-xs font-black uppercase tracking-wider text-emerald-900 border-b border-emerald-300 pb-1 mb-2 text-center">
+                        Bilan de la Séquence {{ sequence_num }}
+                    </h4>
+                    <div class="space-y-1 text-xs">
+                        <div class="flex justify-between">
+                            <span class="text-slate-600">Total Points :</span>
+                            <span class="font-bold text-slate-900 font-mono">{{ "%.2f"|format(student_summary.total_points) }} / {{ student_summary.total_coeff * 20 }}</span>
+                        </div>
+                        <div class="flex justify-between">
+                            <span class="text-slate-600">Total Coeffs :</span>
+                            <span class="font-bold text-slate-900">{{ student_summary.total_coeff }}</span>
+                        </div>
+                        <div class="flex justify-between pt-1 border-t border-emerald-200 items-baseline">
+                            <span class="font-bold text-emerald-950 text-sm">MOYENNE :</span>
+                            <span class="font-black text-xl font-mono {{ 'text-red-600' if student_summary.moyenne < 10 else 'text-emerald-800' }}">
+                                {{ "%.2f"|format(student_summary.moyenne) }} / 20
+                            </span>
+                        </div>
+                        <div class="flex justify-between pt-1">
+                            <span class="font-bold text-slate-700">RANG :</span>
+                            <span class="font-black text-base text-slate-900">
+                                {{ student_summary.rang_formate }} <span class="text-xs font-normal text-slate-500">/ {{ class_stats.effectif }}</span>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="mt-2 text-center py-1 bg-white rounded border border-emerald-300 text-xs font-bold text-emerald-900 uppercase">
+                    Mention : {{ student_summary.mention }}
+                </div>
+            </div>
+
+            <!-- Profil de la classe -->
+            <div class="border border-slate-400 rounded p-2.5 bg-slate-50 text-xs space-y-1.5">
+                <h4 class="font-bold uppercase tracking-wider text-slate-800 border-b border-slate-300 pb-1 text-center">
+                    Profil de la Classe
+                </h4>
+                <div class="flex justify-between pt-1">
+                    <span class="text-slate-600">Moyenne Générale :</span>
+                    <span class="font-bold font-mono">{{ "%.2f"|format(class_stats.moyenne_generale) }}/20</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-600">Plus Forte Moyenne :</span>
+                    <span class="font-bold text-emerald-700 font-mono">{{ "%.2f"|format(class_stats.moyenne_max) }}/20</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-600">Plus Faible Moyenne :</span>
+                    <span class="font-bold text-red-600 font-mono">{{ "%.2f"|format(class_stats.moyenne_min) }}/20</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-600">Taux de Réussite :</span>
+                    <span class="font-bold text-slate-900 font-mono">{{ "%.1f"|format(class_stats.taux_reussite) }}%</span>
+                </div>
+                <div class="flex justify-between pt-1 border-t border-slate-200">
+                    <span class="text-slate-600">Moyennes >= 10 :</span>
+                    <span class="font-bold">{{ class_stats.nb_admis }} / {{ class_stats.effectif }}</span>
+                </div>
+            </div>
+
+            <!-- Discipline & Visa -->
+            <div class="border border-slate-400 rounded p-2.5 bg-slate-50 text-xs space-y-1">
+                <h4 class="font-bold uppercase tracking-wider text-slate-800 border-b border-slate-300 pb-1 text-center">
+                    Discipline & Conduite
+                </h4>
+                <div class="flex justify-between">
+                    <span class="text-slate-600">Absences justifiées :</span>
+                    <span class="font-bold">0 h</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-600">Absences non-justifiées :</span>
+                    <span class="font-bold text-red-600">0 h</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-600">Avertissements :</span>
+                    <span class="font-bold">0</span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-600">Blâmes :</span>
+                    <span class="font-bold">0</span>
+                </div>
+                <div class="pt-2 text-center text-[10px] text-slate-500 italic">
+                    Conduite satisfaisante
+                </div>
+            </div>
+        </div>
+
+        <!-- Visas et Signatures officielles -->
+        <div class="grid grid-cols-3 gap-2 text-center border-t-2 border-slate-900 pt-3 mt-4 text-xs">
+            <div class="h-28 flex flex-col justify-between border-r border-slate-300 pr-2">
+                <span class="font-bold text-slate-800 underline">Le Parent / Tuteur</span>
+                <span class="text-[10px] text-slate-400 italic">Date & Signature</span>
+            </div>
+            <div class="h-28 flex flex-col justify-between border-r border-slate-300 px-2">
+                <span class="font-bold text-slate-800 underline">Le Professeur Principal</span>
+                <div class="text-[11px] font-semibold text-emerald-800">
+                    {{ student_summary.appreciation_generale }}
+                </div>
+                <span class="text-[10px] text-slate-400 italic">Signature</span>
+            </div>
+            <div class="h-28 flex flex-col justify-between pl-2">
+                <div>
+                    <span class="font-bold text-slate-900 underline uppercase">Le Chef d'Établissement</span>
+                    <p class="text-[10px] text-slate-600 mt-0.5">Cachet & Signature</p>
+                </div>
+                <div class="border border-dashed border-slate-400 rounded h-14 mx-auto w-3/4 flex items-center justify-center text-[9px] text-slate-400 uppercase tracking-widest">
+                    Sceau Officiel
+                </div>
+            </div>
+        </div>
+
+        <!-- Pied de page de certification anti-fraude -->
+        <div class="mt-4 pt-2 border-t border-slate-200 flex justify-between items-center text-[9px] text-slate-400 font-mono">
+            <span>Certification EDUBULLETIN 237 - ID Authentification : E237-{{ school.id }}-{{ student.id }}-S{{ sequence_num }}-{{ student.matricule }}</span>
+            <span>Vérifiable sur : https://edubulletin-237.onrender.com/e/{{ school.slug }}</span>
+        </div>
+
+    </div>
+
+</body>
+</html>

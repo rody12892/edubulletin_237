@@ -1,0 +1,191 @@
+{% extends "base.html" %}
+
+{% block title %}Super Admin Kaplo - EDUBULLETIN 237{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div>
+            <div class="flex items-center gap-2">
+                <span class="px-2.5 py-0.5 rounded-full text-xs font-black bg-purple-100 text-purple-800">
+                    SUPER ADMIN CONSOLE
+                </span>
+            </div>
+            <h1 class="text-2xl font-extrabold text-slate-900 tracking-tight mt-1">Supervision Globale Multi-Tenant</h1>
+            <p class="text-sm text-slate-600">
+                Gestion des établissements scolaires, licences et passerelle Mobile Money Monetbil v2.1.
+            </p>
+        </div>
+        <button onclick="document.getElementById('modal-creer-ecole').classList.remove('hidden')"
+            class="px-4 py-2.5 bg-purple-600 hover:bg-purple-700 text-white rounded-xl text-xs font-bold transition flex items-center gap-2 shadow-sm">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            <span>Créer un Nouvel Établissement</span>
+        </button>
+    </div>
+
+    <!-- Alertes -->
+    {% if msg %}
+    <div class="p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-sm mb-6 flex items-center gap-2">
+        <i data-lucide="check-circle" class="w-5 h-5 flex-shrink-0"></i>
+        <span>{{ msg }}</span>
+    </div>
+    {% endif %}
+
+    <!-- Liste des Écoles & Gestion des Licences -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden mb-8">
+        <div class="p-4 bg-slate-50 border-b border-slate-200 font-extrabold text-slate-800 text-sm">
+            Établissements Enregistrés (Total : {{ schools|length }})
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-100/70 text-slate-500 text-xs uppercase font-bold">
+                    <tr>
+                        <th class="py-3 px-4">Code</th>
+                        <th class="py-3 px-4">Nom de l'Établissement</th>
+                        <th class="py-3 px-4">Ville</th>
+                        <th class="py-3 px-4">Contact</th>
+                        <th class="py-3 px-4">Pack & Quota</th>
+                        <th class="py-3 px-4">Date Fin Licence</th>
+                        <th class="py-3 px-4">Statut</th>
+                        <th class="py-3 px-4 text-right">Débrayage Manuel (RG-FACT-03)</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% for sc in schools %}
+                    <tr class="hover:bg-slate-50/80 transition">
+                        <td class="py-3 px-4 font-mono font-bold text-xs text-purple-700">{{ sc.code }}</td>
+                        <td class="py-3 px-4">
+                            <span class="font-bold text-slate-900 block">{{ sc.name }}</span>
+                            <span class="text-xs text-slate-400">/e/{{ sc.slug }}</span>
+                        </td>
+                        <td class="py-3 px-4 text-slate-600">{{ sc.ville }}</td>
+                        <td class="py-3 px-4 text-xs text-slate-500">{{ sc.contact_phone }}</td>
+                        <td class="py-3 px-4 text-xs font-semibold capitalize">
+                            {{ sc.pack_actuel }} ({{ sc.classes_max }} cl.)
+                        </td>
+                        <td class="py-3 px-4 text-xs font-mono font-bold">
+                            {{ sc.date_fin_licence.strftime('%d/%m/%Y') }}
+                        </td>
+                        <td class="py-3 px-4">
+                            {% if sc.statut_licence == 'actif' %}
+                                <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-emerald-100 text-emerald-800">Actif</span>
+                            {% elif sc.statut_licence == 'en_grace' %}
+                                <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">Grâce</span>
+                            {% else %}
+                                <span class="px-2 py-0.5 rounded-full text-xs font-bold bg-red-100 text-red-800">Bloqué</span>
+                            {% endif %}
+                        </td>
+                        <td class="py-3 px-4 text-right">
+                            <form action="/api/superadmin/prolonger-licence" method="POST" class="inline-flex gap-1">
+                                <input type="hidden" name="school_id" value="{{ sc.id }}">
+                                <button type="submit" name="annees" value="1"
+                                    class="px-2.5 py-1 bg-purple-100 hover:bg-purple-200 text-purple-800 rounded text-xs font-bold transition">
+                                    +1 An
+                                </button>
+                                <button type="submit" name="annees" value="2"
+                                    class="px-2.5 py-1 bg-emerald-100 hover:bg-emerald-200 text-emerald-800 rounded text-xs font-bold transition">
+                                    +2 Ans
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Historique des Paiements Monetbil -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+            <span class="font-extrabold text-slate-800 text-sm">Transactions Récentes Monetbil Mobile Money (XAF)</span>
+            <span class="text-xs text-slate-500 font-mono">Service Key : P101jtx2RvVkeUNAuKgfdTyhUjbnUU2z</span>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-sm">
+                <thead class="bg-slate-100/70 text-slate-500 text-xs uppercase font-bold">
+                    <tr>
+                        <th class="py-3 px-4">Date</th>
+                        <th class="py-3 px-4">Référence</th>
+                        <th class="py-3 px-4">Établissement</th>
+                        <th class="py-3 px-4">Pack</th>
+                        <th class="py-3 px-4 text-right">Montant</th>
+                        <th class="py-3 px-4">Statut</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+                    {% if transactions %}
+                        {% for t in transactions %}
+                        <tr class="hover:bg-slate-50/80 transition text-xs">
+                            <td class="py-3 px-4 text-slate-500">{{ t.created_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                            <td class="py-3 px-4 font-mono font-bold">{{ t.reference }}</td>
+                            <td class="py-3 px-4 font-semibold text-slate-800">{{ t.ecole_id }}</td>
+                            <td class="py-3 px-4 capitalize">{{ t.pack }}</td>
+                            <td class="py-3 px-4 text-right font-black text-emerald-700">{{ "{:,.0f}".format(t.montant) }} FCFA</td>
+                            <td class="py-3 px-4">
+                                <span class="px-2 py-0.5 rounded-full font-bold {{ 'bg-emerald-100 text-emerald-800' if t.statut == 'SUCCESS' else 'bg-amber-100 text-amber-800' }}">
+                                    {{ t.statut }}
+                                </span>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-6 text-slate-400 text-xs">Aucune transaction enregistrée pour le moment.</td>
+                        </tr>
+                    {% endif %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- MODAL CRÉATION ÉCOLE -->
+<div id="modal-creer-ecole" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm hidden p-4">
+    <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
+        <div class="flex justify-between items-center pb-3 border-b border-slate-100">
+            <h3 class="text-lg font-extrabold text-slate-900">Créer un Nouvel Établissement</h3>
+            <button onclick="document.getElementById('modal-creer-ecole').classList.add('hidden')" class="p-1.5 text-slate-400 hover:text-slate-600">
+                <i data-lucide="x" class="w-5 h-5"></i>
+            </button>
+        </div>
+
+        <form action="/api/superadmin/creer-ecole" method="POST" class="mt-4 space-y-3">
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-700 mb-1">Nom de l'école</label>
+                <input type="text" name="name" required placeholder="ex: Collège Polyvalent de Yaoundé"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-semibold">
+            </div>
+            <div class="grid grid-cols-2 gap-2">
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-700 mb-1">Code École (3-5 lettres)</label>
+                    <input type="text" name="code" required placeholder="CPY" maxlength="5"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-semibold uppercase">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold uppercase text-slate-700 mb-1">Ville</label>
+                    <input type="text" name="ville" required placeholder="Yaoundé"
+                        class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-semibold">
+                </div>
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-700 mb-1">Téléphone Proviseur (+237)</label>
+                <input type="tel" name="contact_phone" required placeholder="+2376XXXXXXXX"
+                    class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-semibold">
+            </div>
+            <div>
+                <label class="block text-xs font-bold uppercase text-slate-700 mb-1">Pack Initial</label>
+                <select name="pack" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm font-semibold">
+                    <option value="demarrage">Pack Démarrage (6 classes max)</option>
+                    <option value="standard" selected>Pack Standard (15 classes max)</option>
+                    <option value="grand">Pack Grand (30 classes max)</option>
+                    <option value="groupe">Pack Groupe (Illimité)</option>
+                </select>
+            </div>
+            <button type="submit" class="w-full py-3 bg-purple-600 hover:bg-purple-700 text-white font-bold rounded-xl text-sm transition">
+                Créer l'Établissement & Générer la Licence
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

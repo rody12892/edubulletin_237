@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}Connexion - EDUBULLETIN 237{% endblock %}
+
+{% block content %}
+<div class="min-h-[calc(100vh-8rem)] flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8 bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
+        <div class="text-center">
+            <div class="inline-flex items-center justify-center w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-700 to-emerald-600 text-white font-black text-2xl shadow-lg mb-4">
+                237
+            </div>
+            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">Accès Sécurisé à votre Établissement</h2>
+            <p class="mt-2 text-sm text-slate-600">
+                Proviseur, Secrétariat ou Enseignant (Système MINESEC Cameroun)
+            </p>
+        </div>
+
+        {% if error %}
+        <div class="p-4 rounded-xl bg-red-50 border border-red-200 text-red-700 text-sm flex items-center gap-2">
+            <i data-lucide="alert-circle" class="w-5 h-5 flex-shrink-0"></i>
+            <span>{{ error }}</span>
+        </div>
+        {% endif %}
+
+        <form class="mt-8 space-y-5" action="/login" method="POST">
+            <div>
+                <label for="identifiant" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                    Numéro de Téléphone (+237) ou Email
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <i data-lucide="user" class="w-5 h-5"></i>
+                    </div>
+                    <input id="identifiant" name="identifiant" type="text" required
+                        class="block w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-600 focus:border-brand-600 transition"
+                        placeholder="+237699001122 ou email@ecole.cm" value="{{ identifiant or '' }}">
+                </div>
+            </div>
+
+            <div>
+                <label for="password" class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-1">
+                    Mot de passe
+                </label>
+                <div class="relative">
+                    <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                        <i data-lucide="lock" class="w-5 h-5"></i>
+                    </div>
+                    <input id="password" name="password" type="password" required
+                        class="block w-full pl-11 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 placeholder-slate-400 text-sm focus:bg-white focus:outline-none focus:ring-2 focus:ring-brand-600 focus:border-brand-600 transition"
+                        placeholder="••••••••">
+                </div>
+            </div>
+
+            <button type="submit"
+                class="w-full flex justify-center items-center gap-2 py-3.5 px-4 border border-transparent rounded-xl shadow-md text-sm font-bold text-white bg-brand-600 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand-600 transition">
+                <span>Se connecter</span>
+                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+            </button>
+        </form>
+
+        <!-- Sélecteur d'identifiants de test en 1 clic -->
+        <div class="pt-6 border-t border-slate-100">
+            <p class="text-xs font-bold text-slate-500 uppercase tracking-wider text-center mb-3">
+                Comptes de Démonstration (1 clic pour tester)
+            </p>
+            <div class="grid grid-cols-2 gap-2 text-xs">
+                <button type="button" onclick="fillCreds('+237699001122', 'Proviseur2026')"
+                    class="p-2.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-brand-50 hover:border-brand-300 text-left transition">
+                    <strong class="block text-slate-800">Proviseur</strong>
+                    <span class="text-slate-500 text-[10px]">+237699001122</span>
+                </button>
+                <button type="button" onclick="fillCreds('+237677112233', 'Secretaire2026')"
+                    class="p-2.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-brand-50 hover:border-brand-300 text-left transition">
+                    <strong class="block text-slate-800">Secrétariat</strong>
+                    <span class="text-slate-500 text-[10px]">+237677112233</span>
+                </button>
+                <button type="button" onclick="fillCreds('+237690112233', 'Prof2026')"
+                    class="p-2.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-brand-50 hover:border-brand-300 text-left transition">
+                    <strong class="block text-slate-800">Prof. Maths</strong>
+                    <span class="text-slate-500 text-[10px]">+237690112233</span>
+                </button>
+                <button type="button" onclick="fillCreds('admin@edubulletin237.cm', 'Admin237!')"
+                    class="p-2.5 rounded-lg border border-slate-200 bg-slate-50 hover:bg-emerald-50 hover:border-emerald-300 text-left transition">
+                    <strong class="block text-emerald-800">Super Admin Kaplo</strong>
+                    <span class="text-slate-500 text-[10px]">admin@edubulletin237.cm</span>
+                </button>
+            </div>
+        </div>
+
+        <div class="text-center pt-2">
+            <a href="/e/lycee-excellence-douala" class="text-xs font-semibold text-emerald-700 hover:underline">
+                Vous êtes Parent ? Accéder au portail de consultation public sans compte ➔
+            </a>
+        </div>
+    </div>
+</div>
+
+<script>
+    function fillCreds(identifiant, password) {
+        document.getElementById('identifiant').value = identifiant;
+        document.getElementById('password').value = password;
+    }
+</script>
+{% endblock %}
