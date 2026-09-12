@@ -9,17 +9,17 @@ from pydantic import BaseModel, Field
 from typing import List, Dict, Any, Optional
 from sqlalchemy.orm import Session
 
-# Modules du projet
+# Modules internes
 from database import get_db, Student, Grade, Subject, School, init_db
 from payment_gateway import initiate_mobile_money_payment, verify_mobile_money_payment
 
 app = FastAPI(
     title="EDUBULLETIN 237",
     description="SaaS d'automatisation des bulletins scolaires et gestion multi-tenant au Cameroun.",
-    version="1.0.2"
+    version="1.0.3"
 )
 
-# Configuration CORS pour intégrations externes et front-end
+# Configuration CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -28,7 +28,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Résolution sécurisée des répertoires de base
+# Résolution des chemins statiques et templates
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 STATIC_DIR = os.path.join(BASE_DIR, "static")
 TEMPLATES_DIR = os.path.join(BASE_DIR, "templates")
@@ -37,23 +37,22 @@ INDEX_HTML_PATH = os.path.join(TEMPLATES_DIR, "index.html")
 os.makedirs(STATIC_DIR, exist_ok=True)
 os.makedirs(TEMPLATES_DIR, exist_ok=True)
 
-# Montage des fichiers statiques avec vérification
+# Montage des fichiers statiques
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
-# Initialisation de la base SQLite et des tables au démarrage
+# Initialisation au démarrage
 @app.on_event("startup")
-def on_startup():
+def startup_event():
     try:
         init_db()
-    except Exception as e:
-        print(f"[EDUBULLETIN 237] Avertissement initialisation BD: {e}")
+    except Exception as exc:
+        print(f"[EDUBULLETIN 237] Notification démarrage BD: {exc}")
 
 # --- SCHÉMAS PYDANTIC ---
-
 class PaymentInitiateRequest(BaseModel):
-    ecole_id: int = Field(default=1, description="ID de l'école (Multi-tenant)")
+    ecole_id: int = Field(default=1, description="ID de l'établissement")
     amount: float = Field(..., gt=0, description="Montant en FCFA")
-    phone_number: str = Field(..., description="Numéro de téléphone Mobile Money")
+    phone_number: str = Field(..., description="Numéro Mobile Money (+237)")
     payer_name: str = Field(default="Parent d'élève", description="Nom du payeur")
 
 class GradeInput(BaseModel):
@@ -61,10 +60,10 @@ class GradeInput(BaseModel):
     subject_id: int = Field(..., description="ID de la matière")
     sequence: int = Field(..., ge=1, le=6, description="Séquence d'évaluation (1 à 6)")
     note: float = Field(..., ge=0, le=20, description="Note sur 20")
-    coefficient: int = Field(default=1, gt=0, description="Coefficient de la matière")
+    coefficient: int = Field(default=1, gt=0, description="Coefficient")
 
 class StudentCreate(BaseModel):
-    ecole_id: int = Field(default=1, description="ID de l'école (Multi-tenant)")
+    ecole_id: int = Field(default=1)
     nom: str = Field(..., min_length=1)
     prenom: str = Field(..., min_length=1)
     matricule: str = Field(..., min_length=3)
@@ -77,63 +76,75 @@ class StudentResponse(StudentCreate):
     class Config:
         from_attributes = True
 
-# --- ROUTE PRINCIPALE & VÉRIFICATIONS (RÉSOLUTION GARANTIE ERREUR 404) ---
-
+# --- ROUTINE DE LECTURE DU TEMPLATE RACINE ---
 def get_index_content() -> str:
-    """Lit le fichier index.html avec résilience de secours."""
-    candidate_paths = [
+    candidates = [
         INDEX_HTML_PATH,
-        os.path.join(os.getcwd(), "templates", "index.html"),
         os.path.join(BASE_DIR, "index.html"),
-        "templates/index.html"
+        os.path.join(os.getcwd(), "templates", "index.html"),
+        os.path.join(os.getcwd(), "index.html")
     ]
-    for path in candidate_paths:
+    for path in candidates:
         if os.path.isfile(path):
             try:
                 with open(path, "r", encoding="utf-8") as f:
                     return f.read()
             except Exception:
                 continue
-    return "<!DOCTYPE html><html><head><title>EDUBULLETIN 237</title></head><body><h1>EDUBULLETIN 237</h1><p>Plateforme opérationnelle.</p></body></html>"
+    return """<!DOCTYPE html>
+<html>
+<head><title>EDUBULLETIN 237</title><meta charset='utf-8'></head>
+<body style='font-family: sans-serif; text-align: center; padding: 50px;'>
+  <h1>EDUBULLETIN 237 🇨🇲</h1>
+  <p>Plateforme opérationnelle sur le port 8080.</p>
+</body>
+</html>"""
 
-@app.api_route("/", methods=["GET", "HEAD"], response_class=HTMLResponse)
-@app.api_route("/index.html", methods=["GET", "HEAD"], response_class=HTMLResponse)
-async def serve_homepage(request: Request):
-    """Sert l'interface web SaaS principale sans jamais retourner de 404."""
-    content = get_index_content()
-    return HTMLResponse(content=content, status_code=status.HTTP_200_OK)
+# --- ROUTE RACINE & INTERFACE FRONT-END (RÉSOLUTION 404 GARANTIE) ---
+@app.get("/", response_class=HTMLResponse)
+@app.get("/index.html", response_class=HTMLResponse)
+@app.head("/")
+@app.head("/index.html")
+async def serve_root():
+    """Sert l'interface utilisateur sur la racine '/' sans 404."""
+    if os.path.isfile(INDEX_HTML_PATH):
+        return FileResponse(INDEX_HTML_PATH, media_type="text/html; charset=utf-8")
+    return HTMLResponse(content=get_index_content(), status_code=status.HTTP_200_OK)
 
-# Health checks multi-chemins pour Cloud Run, Kubernetes, AWS et proxys
-@app.api_route("/health", methods=["GET", "HEAD"])
-@app.api_route("/healthz", methods=["GET", "HEAD"])
-@app.api_route("/_health", methods=["GET", "HEAD"])
-@app.api_route("/api/health", methods=["GET", "HEAD"])
+# Favicon direct pour éviter les logs d'erreurs 404
+@app.get("/favicon.ico")
+async def favicon():
+    return HTMLResponse(content="", status_code=204)
+
+# Health Checks pour Cloud Run, GCP, K8s et Load Balancers
+@app.get("/health")
+@app.get("/healthz")
+@app.get("/_health")
+@app.get("/api/health")
+@app.head("/health")
 async def health_check():
+    port = int(os.environ.get("PORT", "8080"))
     return {
         "status": "healthy",
         "app": "EDUBULLETIN 237",
-        "port": int(os.environ.get("PORT", "8080")),
         "host": "0.0.0.0",
-        "version": "1.0.2"
+        "port": port,
+        "version": "1.0.3"
     }
 
-# --- GESTIONNAIRE D'ERREUR 404 ROBUSTE ---
-
+# Fallback 404
 @app.exception_handler(StarletteHTTPException)
 @app.exception_handler(404)
-async def custom_404_handler(request: Request, exc: Exception):
-    # Si la requête concerne une API inexistante
+async def fallback_404_handler(request: Request, exc: Exception):
     if request.url.path.startswith("/api/"):
         return JSONResponse(
             status_code=status.HTTP_404_NOT_FOUND,
-            content={"status": "error", "message": f"Endpoint API non trouvé: {request.url.path}"}
+            content={"status": "error", "message": f"Endpoint API introuvable: {request.url.path}"}
         )
-    # Pour toute autre URL (SPA fallback pour le front-end)
-    content = get_index_content()
-    return HTMLResponse(content=content, status_code=status.HTTP_200_OK)
+    # Rendu du front-end pour toute requête de page web
+    return HTMLResponse(content=get_index_content(), status_code=status.HTTP_200_OK)
 
-# --- ROUTES DE PAIEMENT (MOBILE MONEY FCFA) ---
-
+# --- ROUTES API PAIEMENTS ---
 @app.post("/api/pay/initiate", status_code=status.HTTP_200_OK)
 @app.post("/api/pay", status_code=status.HTTP_200_OK)
 async def initiate_payment(payload: PaymentInitiateRequest):
@@ -161,8 +172,7 @@ async def verify_payment(reference: str):
         )
     return result
 
-# --- ROUTES SAAS : GESTION SCOLAIRE ---
-
+# --- ROUTES API GESTION SCOLAIRE ---
 @app.get("/api/students", response_model=List[StudentResponse])
 def list_students(ecole_id: int = 1, db: Session = Depends(get_db)):
     return db.query(Student).filter(Student.ecole_id == ecole_id).all()
@@ -242,8 +252,7 @@ def calculate_class_ranks(ecole_id: int, classe: str, sequence: int, db: Session
         "classement": results
     }
 
-# --- PORTAIL PARENT PUBLIC & CONSULTATION DE BULLETIN ---
-
+# --- PORTAIL PARENT & CONSULTATION DE BULLETIN ---
 @app.get("/api/bulletin/{matricule}/{sequence}")
 @app.get("/api/report")
 def get_student_bulletin(matricule: str = "237-0014", sequence: int = 1, db: Session = Depends(get_db)):
@@ -252,13 +261,12 @@ def get_student_bulletin(matricule: str = "237-0014", sequence: int = 1, db: Ses
 
     student = db.query(Student).filter(Student.matricule == matricule).first()
     if not student:
-        # Si matricule non présent, chercher le premier étudiant de test pour éviter le blocage
         student = db.query(Student).first()
         if not student:
             raise HTTPException(status_code=404, detail="Aucun élève trouvé avec ce matricule dans le système.")
 
     school = db.query(School).filter(School.id == student.ecole_id).first()
-    school_name = school.name if school else "Groupe Scolaire Bilingue"
+    school_name = school.name if school else "Groupe Scolaire Bilingue de l'Excellence 237"
 
     all_subjects = db.query(Subject).filter(Subject.ecole_id == student.ecole_id).all()
     if not all_subjects:
@@ -281,7 +289,6 @@ def get_student_bulletin(matricule: str = "237-0014", sequence: int = 1, db: Ses
         for g in grades:
             notes_map[f"seq_{g.sequence}"] = g.note
 
-        # Remplir des valeurs représentatives si non saisies
         if not notes_map:
             note_def = default_notes[idx % len(default_notes)]
             notes_map = {"seq_1": note_def, "seq_2": max(0.0, note_def - 0.5), "seq_3": min(20.0, note_def + 0.5)}
@@ -322,11 +329,13 @@ def get_student_bulletin(matricule: str = "237-0014", sequence: int = 1, db: Ses
         }
     }
 
-# --- POINT D'ENTRÉE DU SERVEUR (0.0.0.0 & PORT ENVIRONNEMENT) ---
+# --- POINT D'ENTRÉE STRICT SUR 0.0.0.0 & PORT 8080 (OU VARIABLE ENVIRONNEMENT) ---
 if __name__ == "__main__":
-    port_env = os.environ.get("PORT", "8080")
+    port_str = os.environ.get("PORT", "8080").strip()
     try:
-        port = int(port_env)
+        port = int(port_str)
     except ValueError:
         port = 8080
+    
+    print(f"[EDUBULLETIN 237] Démarrage du serveur uvicorn sur http://0.0.0.0:{port}")
     uvicorn.run("app:app", host="0.0.0.0", port=port, reload=False)
