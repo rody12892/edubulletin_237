@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EDUBULLETIN 237 - Gestion Scolaire</title>
+    <title>EDUBULLETIN 237 - Gestion Scolaire & Bulletins</title>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -36,13 +36,10 @@
         }
     </script>
     <style>
-        /* Scrollbar minimaliste */
         ::-webkit-scrollbar { width: 6px; height: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #d4d4d8; border-radius: 3px; }
         .dark ::-webkit-scrollbar-thumb { background: #3f3f46; }
-        
-        /* Utilitaires pour masquer les vues */
         .hidden-view { display: none !important; }
     </style>
 </head>
@@ -51,11 +48,14 @@
     <!-- Header Navigation -->
     <header class="sticky top-0 z-40 w-full border-b border-neutral-200 dark:border-neutral-800 bg-white/80 dark:bg-neutral-950/80 backdrop-blur-md">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-            <div class="flex items-center gap-2">
-                <div class="w-8 h-8 bg-brand-600 rounded flex items-center justify-center text-white font-bold text-sm">
-                    EB
+            <div class="flex items-center gap-3 cursor-pointer" onclick="window.location.href='/'">
+                <div class="w-9 h-9 bg-brand-600 rounded-lg flex items-center justify-center text-white font-bold text-sm shadow-sm">
+                    237
                 </div>
-                <span class="font-semibold text-lg tracking-tight">EDUBULLETIN 237</span>
+                <div>
+                    <span class="font-bold text-lg tracking-tight text-neutral-900 dark:text-white">EDUBULLETIN</span>
+                    <span class="text-xs text-brand-600 dark:text-brand-400 font-semibold ml-1 px-1.5 py-0.5 bg-brand-50 dark:bg-brand-900/30 rounded">SaaS Cameroun</span>
+                </div>
             </div>
             <div class="flex items-center gap-4">
                 <button id="theme-toggle" class="p-2 text-neutral-500 hover:text-neutral-900 dark:text-neutral-400 dark:hover:text-white transition-colors rounded-md hover:bg-neutral-100 dark:hover:bg-neutral-900">
@@ -77,30 +77,34 @@
         
         <!-- VIEW: LOGIN -->
         <section id="view-login" class="flex-grow flex items-center justify-center py-12">
-            <div class="w-full max-w-sm">
+            <div class="w-full max-w-md bg-white dark:bg-neutral-900 p-8 rounded-2xl border border-neutral-200 dark:border-neutral-800 shadow-xl">
                 <div class="text-center mb-8">
-                    <h1 class="text-2xl font-semibold text-neutral-900 dark:text-white">Connexion</h1>
-                    <p class="text-sm text-neutral-600 dark:text-neutral-400 mt-2">Gérez les bulletins de vos élèves ou consultez les résultats de vos enfants.</p>
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300 mb-3">
+                        <span class="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+                        Plateforme en ligne - MINESEC / MINEDUB
+                    </div>
+                    <h1 class="text-2xl font-bold text-neutral-900 dark:text-white">Portail Scolaire 237</h1>
+                    <p class="text-sm text-neutral-600 dark:text-neutral-400 mt-2">Accédez à la gestion séquentielle ou consultez le bulletin de votre enfant.</p>
                 </div>
                 
                 <form id="login-form" class="space-y-4">
                     <div>
-                        <label for="login-role" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Type de compte</label>
-                        <select id="login-role" class="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500 transition-colors">
-                            <option value="director">Directeur d'établissement</option>
-                            <option value="parent">Parent d'élève</option>
+                        <label for="login-role" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Profil utilisateur</label>
+                        <select id="login-role" class="w-full bg-white dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 transition-colors">
+                            <option value="director">Directeur / Censeur (Administration)</option>
+                            <option value="parent">Parent d'élève (Consultation immédiate)</option>
                         </select>
                     </div>
                     <div>
                         <label for="login-id" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Identifiant (Code École ou Matricule)</label>
-                        <input type="text" id="login-id" required class="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500 transition-colors" placeholder="Ex: ECOLE-001">
+                        <input type="text" id="login-id" required value="237-0014" class="w-full bg-white dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 transition-colors" placeholder="Ex: 237-0014 ou ECOLE-001">
                     </div>
                     <div>
-                        <label for="login-password" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Mot de passe</label>
-                        <input type="password" id="login-password" required class="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500 transition-colors" placeholder="••••••••">
+                        <label for="login-password" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Mot de passe / Code d'accès</label>
+                        <input type="password" id="login-password" required value="bulletin237" class="w-full bg-white dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 transition-colors" placeholder="••••••••">
                     </div>
-                    <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-medium rounded-md px-4 py-2.5 text-sm transition-colors flex justify-center items-center gap-2">
-                        <span>Se connecter</span>
+                    <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-lg px-4 py-3 text-sm transition-all shadow-md hover:shadow flex justify-center items-center gap-2 mt-2">
+                        <span>Accéder à l'espace</span>
                         <i data-lucide="arrow-right" class="w-4 h-4"></i>
                     </button>
                 </form>
@@ -111,94 +115,85 @@
         <section id="view-dashboard" class="hidden-view space-y-8">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 class="text-2xl font-semibold text-neutral-900 dark:text-white">Tableau de bord</h1>
-                    <p class="text-sm text-neutral-600 dark:text-neutral-400 mt-1">Année scolaire 2023-2024</p>
+                    <h1 class="text-2xl font-bold text-neutral-900 dark:text-white">Tableau de bord de l'établissement</h1>
+                    <p class="text-sm text-neutral-600 dark:text-neutral-400 mt-1">Collège Bilingue de l'Excellence 237 - Année 2023-2024</p>
                 </div>
                 <div class="flex items-center gap-3">
-                    <button id="btn-show-subscription" class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-900 dark:text-white font-medium rounded-md px-4 py-2 text-sm transition-colors flex items-center gap-2 shadow-sm">
-                        <i data-lucide="credit-card" class="w-4 h-4"></i>
-                        Abonnement
+                    <button id="btn-show-subscription" class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800 text-neutral-900 dark:text-white font-medium rounded-lg px-4 py-2.5 text-sm transition-colors flex items-center gap-2 shadow-sm">
+                        <i data-lucide="credit-card" class="w-4 h-4 text-brand-600"></i>
+                        Abonnement Mobile Money
                     </button>
-                    <button id="btn-generate-bulletins" class="bg-brand-600 hover:bg-brand-700 text-white font-medium rounded-md px-4 py-2 text-sm transition-colors flex items-center gap-2 shadow-sm">
+                    <button id="btn-generate-bulletins" class="bg-brand-600 hover:bg-brand-700 text-white font-medium rounded-lg px-4 py-2.5 text-sm transition-colors flex items-center gap-2 shadow-sm">
                         <i data-lucide="file-text" class="w-4 h-4"></i>
-                        Générer les bulletins
+                        Calculer moyennes & rangs
                     </button>
                 </div>
             </div>
 
             <!-- Stats Grid -->
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg p-5 shadow-sm">
-                    <div class="text-sm font-medium text-neutral-500 dark:text-neutral-400">Total Élèves</div>
-                    <div class="mt-2 text-3xl font-semibold text-neutral-900 dark:text-white" id="stat-students">0</div>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+                <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 shadow-sm">
+                    <div class="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Effectif total</div>
+                    <div class="mt-2 text-3xl font-bold text-neutral-900 dark:text-white" id="stat-students">45 élèves</div>
                 </div>
-                <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg p-5 shadow-sm">
-                    <div class="text-sm font-medium text-neutral-500 dark:text-neutral-400">Classes Actives</div>
-                    <div class="mt-2 text-3xl font-semibold text-neutral-900 dark:text-white" id="stat-classes">0</div>
+                <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 shadow-sm">
+                    <div class="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Classes actives</div>
+                    <div class="mt-2 text-3xl font-bold text-neutral-900 dark:text-white" id="stat-classes">3ème A, 4ème, 6ème</div>
                 </div>
-                <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg p-5 shadow-sm">
-                    <div class="text-sm font-medium text-neutral-500 dark:text-neutral-400">Séquence en cours</div>
-                    <div class="mt-2 text-3xl font-semibold text-neutral-900 dark:text-white" id="stat-sequence">Seq 3</div>
+                <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-5 shadow-sm">
+                    <div class="text-xs font-semibold uppercase tracking-wider text-neutral-500 dark:text-neutral-400">Séquence en cours</div>
+                    <div class="mt-2 text-3xl font-bold text-brand-600 dark:text-brand-400" id="stat-sequence">Séquence 3 (Trimestre 2)</div>
                 </div>
             </div>
 
-            <!-- Grade Entry Interface (Spreadsheet like) -->
-            <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg shadow-sm overflow-hidden flex flex-col">
-                <div class="p-4 border-b border-neutral-200 dark:border-neutral-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-neutral-50/50 dark:bg-neutral-900/50">
-                    <h2 class="text-base font-semibold text-neutral-900 dark:text-white">Saisie rapide des notes</h2>
+            <!-- Grade Entry Interface -->
+            <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-sm overflow-hidden flex flex-col">
+                <div class="p-4 border-b border-neutral-200 dark:border-neutral-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-neutral-50/70 dark:bg-neutral-900/70">
+                    <div>
+                        <h2 class="text-base font-semibold text-neutral-900 dark:text-white">Grille séquentielle de saisie des notes</h2>
+                        <p class="text-xs text-neutral-500">Conforme au barème officiel de 0 à 20</p>
+                    </div>
                     <div class="flex items-center gap-3">
-                        <select id="select-class" class="bg-white dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500">
-                            <option value="6eme">6ème</option>
-                            <option value="5eme">5ème</option>
-                            <option value="4eme">4ème</option>
-                            <option value="3eme">3ème</option>
-                        </select>
-                        <select id="select-subject" class="bg-white dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 rounded-md px-3 py-1.5 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500">
-                            <option value="maths">Mathématiques</option>
-                            <option value="francais">Français</option>
-                            <option value="anglais">Anglais</option>
-                            <option value="svt">SVT</option>
-                        </select>
-                        <button id="btn-save-grades" class="bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-200 font-medium rounded-md px-3 py-1.5 text-sm transition-colors">
-                            Enregistrer
+                        <button id="btn-save-grades" class="bg-neutral-900 dark:bg-white text-white dark:text-neutral-900 hover:bg-neutral-800 dark:hover:bg-neutral-200 font-semibold rounded-lg px-4 py-2 text-sm transition-colors flex items-center gap-2">
+                            <i data-lucide="save" class="w-4 h-4"></i>
+                            Enregistrer les notes
                         </button>
                     </div>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-sm text-left whitespace-nowrap">
-                        <thead class="bg-neutral-50 dark:bg-neutral-950 border-b border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-400">
+                        <thead class="bg-neutral-100 dark:bg-neutral-950 border-b border-neutral-200 dark:border-neutral-800 text-neutral-700 dark:text-neutral-300 font-semibold">
                             <tr>
-                                <th class="px-4 py-3 font-medium w-64">Nom de l'élève</th>
-                                <th class="px-4 py-3 font-medium w-24 text-center">Seq 1</th>
-                                <th class="px-4 py-3 font-medium w-24 text-center">Seq 2</th>
-                                <th class="px-4 py-3 font-medium w-24 text-center">Seq 3</th>
-                                <th class="px-4 py-3 font-medium w-24 text-center">Seq 4</th>
-                                <th class="px-4 py-3 font-medium w-24 text-center">Seq 5</th>
-                                <th class="px-4 py-3 font-medium w-24 text-center">Seq 6</th>
-                                <th class="px-4 py-3 font-medium w-24 text-center text-brand-600 dark:text-brand-400">Moy. Annuelle</th>
+                                <th class="px-4 py-3 w-64">Nom et Prénom de l'élève</th>
+                                <th class="px-3 py-3 w-24 text-center">Seq 1</th>
+                                <th class="px-3 py-3 w-24 text-center">Seq 2</th>
+                                <th class="px-3 py-3 w-24 text-center">Seq 3</th>
+                                <th class="px-3 py-3 w-24 text-center">Seq 4</th>
+                                <th class="px-3 py-3 w-24 text-center">Seq 5</th>
+                                <th class="px-3 py-3 w-24 text-center">Seq 6</th>
+                                <th class="px-4 py-3 w-24 text-center text-brand-600 dark:text-brand-400 font-bold">Moyenne</th>
                             </tr>
                         </thead>
                         <tbody id="grades-tbody" class="divide-y divide-neutral-200 dark:divide-neutral-800">
-                            <!-- Lignes générées par JS, exemple statique pour la structure -->
-                            <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
-                                <td class="px-4 py-2 font-medium text-neutral-900 dark:text-white">ABANDA Jean</td>
-                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="14.5" class="w-full bg-transparent border border-transparent hover:border-neutral-300 dark:hover:border-neutral-700 focus:border-brand-500 focus:bg-white dark:focus:bg-neutral-950 rounded px-2 py-1 text-center outline-none transition-all"></td>
-                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="15" class="w-full bg-transparent border border-transparent hover:border-neutral-300 dark:hover:border-neutral-700 focus:border-brand-500 focus:bg-white dark:focus:bg-neutral-950 rounded px-2 py-1 text-center outline-none transition-all"></td>
-                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="13" class="w-full bg-transparent border border-transparent hover:border-neutral-300 dark:hover:border-neutral-700 focus:border-brand-500 focus:bg-white dark:focus:bg-neutral-950 rounded px-2 py-1 text-center outline-none transition-all"></td>
-                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" class="w-full bg-transparent border border-transparent hover:border-neutral-300 dark:hover:border-neutral-700 focus:border-brand-500 focus:bg-white dark:focus:bg-neutral-950 rounded px-2 py-1 text-center outline-none transition-all"></td>
-                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" class="w-full bg-transparent border border-transparent hover:border-neutral-300 dark:hover:border-neutral-700 focus:border-brand-500 focus:bg-white dark:focus:bg-neutral-950 rounded px-2 py-1 text-center outline-none transition-all"></td>
-                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" class="w-full bg-transparent border border-transparent hover:border-neutral-300 dark:hover:border-neutral-700 focus:border-brand-500 focus:bg-white dark:focus:bg-neutral-950 rounded px-2 py-1 text-center outline-none transition-all"></td>
-                                <td class="px-4 py-2 text-center font-semibold text-brand-600 dark:text-brand-400">14.16</td>
+                            <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/40 transition-colors">
+                                <td class="px-4 py-3 font-semibold text-neutral-900 dark:text-white">ABANDA Jean (3ème A)</td>
+                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="14.5" class="grade-input w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 focus:border-brand-500 rounded px-2 py-1 text-center outline-none"></td>
+                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="15.0" class="grade-input w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 focus:border-brand-500 rounded px-2 py-1 text-center outline-none"></td>
+                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="13.0" class="grade-input w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 focus:border-brand-500 rounded px-2 py-1 text-center outline-none"></td>
+                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="14.0" class="grade-input w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 focus:border-brand-500 rounded px-2 py-1 text-center outline-none"></td>
+                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="16.0" class="grade-input w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 focus:border-brand-500 rounded px-2 py-1 text-center outline-none"></td>
+                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="14.0" class="grade-input w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 focus:border-brand-500 rounded px-2 py-1 text-center outline-none"></td>
+                                <td class="px-4 py-3 text-center font-bold text-brand-600 dark:text-brand-400 row-average">14.42</td>
                             </tr>
-                            <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/50 transition-colors">
-                                <td class="px-4 py-2 font-medium text-neutral-900 dark:text-white">BILO'O Marie</td>
-                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="11" class="w-full bg-transparent border border-transparent hover:border-neutral-300 dark:hover:border-neutral-700 focus:border-brand-500 focus:bg-white dark:focus:bg-neutral-950 rounded px-2 py-1 text-center outline-none transition-all"></td>
-                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="12.5" class="w-full bg-transparent border border-transparent hover:border-neutral-300 dark:hover:border-neutral-700 focus:border-brand-500 focus:bg-white dark:focus:bg-neutral-950 rounded px-2 py-1 text-center outline-none transition-all"></td>
-                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="10" class="w-full bg-transparent border border-transparent hover:border-neutral-300 dark:hover:border-neutral-700 focus:border-brand-500 focus:bg-white dark:focus:bg-neutral-950 rounded px-2 py-1 text-center outline-none transition-all"></td>
-                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" class="w-full bg-transparent border border-transparent hover:border-neutral-300 dark:hover:border-neutral-700 focus:border-brand-500 focus:bg-white dark:focus:bg-neutral-950 rounded px-2 py-1 text-center outline-none transition-all"></td>
-                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" class="w-full bg-transparent border border-transparent hover:border-neutral-300 dark:hover:border-neutral-700 focus:border-brand-500 focus:bg-white dark:focus:bg-neutral-950 rounded px-2 py-1 text-center outline-none transition-all"></td>
-                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" class="w-full bg-transparent border border-transparent hover:border-neutral-300 dark:hover:border-neutral-700 focus:border-brand-500 focus:bg-white dark:focus:bg-neutral-950 rounded px-2 py-1 text-center outline-none transition-all"></td>
-                                <td class="px-4 py-2 text-center font-semibold text-brand-600 dark:text-brand-400">11.16</td>
+                            <tr class="hover:bg-neutral-50 dark:hover:bg-neutral-800/40 transition-colors">
+                                <td class="px-4 py-3 font-semibold text-neutral-900 dark:text-white">BILO'O Marie (3ème A)</td>
+                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="11.0" class="grade-input w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 focus:border-brand-500 rounded px-2 py-1 text-center outline-none"></td>
+                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="12.5" class="grade-input w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 focus:border-brand-500 rounded px-2 py-1 text-center outline-none"></td>
+                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="10.0" class="grade-input w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 focus:border-brand-500 rounded px-2 py-1 text-center outline-none"></td>
+                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="13.0" class="grade-input w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 focus:border-brand-500 rounded px-2 py-1 text-center outline-none"></td>
+                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="12.0" class="grade-input w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 focus:border-brand-500 rounded px-2 py-1 text-center outline-none"></td>
+                                <td class="px-2 py-2"><input type="number" min="0" max="20" step="0.25" value="11.5" class="grade-input w-full bg-neutral-50 dark:bg-neutral-950 border border-neutral-300 dark:border-neutral-700 focus:border-brand-500 rounded px-2 py-1 text-center outline-none"></td>
+                                <td class="px-4 py-3 text-center font-bold text-brand-600 dark:text-brand-400 row-average">11.67</td>
                             </tr>
                         </tbody>
                     </table>
@@ -210,83 +205,16 @@
         <section id="view-parent" class="hidden-view space-y-8">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h1 class="text-2xl font-semibold text-neutral-900 dark:text-white">Portail Parent</h1>
-                    <p class="text-sm text-neutral-600 dark:text-neutral-400 mt-1">Suivi académique de votre enfant</p>
+                    <h1 class="text-2xl font-bold text-neutral-900 dark:text-white">Portail Parent</h1>
+                    <p class="text-sm text-neutral-600 dark:text-neutral-400 mt-1">Consultation certifiée du bulletin scolaire</p>
                 </div>
-                <button id="btn-download-bulletin" class="bg-brand-600 hover:bg-brand-700 text-white font-medium rounded-md px-4 py-2 text-sm transition-colors flex items-center gap-2 shadow-sm w-fit">
+                <button onclick="window.print()" class="bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-lg px-4 py-2.5 text-sm transition-colors flex items-center gap-2 shadow-sm w-fit">
                     <i data-lucide="download" class="w-4 h-4"></i>
-                    Télécharger le bulletin
+                    Imprimer / Télécharger le bulletin officiel
                 </button>
             </div>
 
-            <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg p-6 shadow-sm flex flex-col md:flex-row gap-6 items-start md:items-center justify-between">
-                <div class="flex items-center gap-4">
-                    <div class="w-16 h-16 bg-neutral-100 dark:bg-neutral-800 rounded-full flex items-center justify-center text-2xl font-bold text-neutral-400">
-                        AJ
-                    </div>
-                    <div>
-                        <h2 class="text-lg font-semibold text-neutral-900 dark:text-white">ABANDA Jean</h2>
-                        <p class="text-sm text-neutral-600 dark:text-neutral-400">Classe : 3ème A | Matricule : 237-0014</p>
-                    </div>
-                </div>
-                <div class="flex gap-6 text-center">
-                    <div>
-                        <div class="text-xs font-medium text-neutral-500 uppercase tracking-wider">Moyenne Générale</div>
-                        <div class="text-2xl font-bold text-brand-600 dark:text-brand-400 mt-1">14.16 / 20</div>
-                    </div>
-                    <div class="w-px bg-neutral-200 dark:bg-neutral-800"></div>
-                    <div>
-                        <div class="text-xs font-medium text-neutral-500 uppercase tracking-wider">Rang</div>
-                        <div class="text-2xl font-bold text-neutral-900 dark:text-white mt-1">4<span class="text-sm font-normal text-neutral-500">ème</span> / 45</div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg shadow-sm overflow-hidden">
-                <div class="p-4 border-b border-neutral-200 dark:border-neutral-800 bg-neutral-50/50 dark:bg-neutral-900/50">
-                    <h3 class="text-base font-semibold text-neutral-900 dark:text-white">Détail des notes par matière</h3>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full text-sm text-left">
-                        <thead class="bg-neutral-50 dark:bg-neutral-950 border-b border-neutral-200 dark:border-neutral-800 text-neutral-600 dark:text-neutral-400">
-                            <tr>
-                                <th class="px-4 py-3 font-medium">Matière</th>
-                                <th class="px-4 py-3 font-medium text-center">Seq 1</th>
-                                <th class="px-4 py-3 font-medium text-center">Seq 2</th>
-                                <th class="px-4 py-3 font-medium text-center">Seq 3</th>
-                                <th class="px-4 py-3 font-medium text-center">Moyenne</th>
-                                <th class="px-4 py-3 font-medium text-center">Appréciation</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-neutral-200 dark:divide-neutral-800">
-                            <tr>
-                                <td class="px-4 py-3 font-medium text-neutral-900 dark:text-white">Mathématiques</td>
-                                <td class="px-4 py-3 text-center">14.5</td>
-                                <td class="px-4 py-3 text-center">15.0</td>
-                                <td class="px-4 py-3 text-center">13.0</td>
-                                <td class="px-4 py-3 text-center font-semibold text-brand-600 dark:text-brand-400">14.16</td>
-                                <td class="px-4 py-3 text-center text-green-600 dark:text-green-400">Bien</td>
-                            </tr>
-                            <tr>
-                                <td class="px-4 py-3 font-medium text-neutral-900 dark:text-white">Français</td>
-                                <td class="px-4 py-3 text-center">12.0</td>
-                                <td class="px-4 py-3 text-center">11.5</td>
-                                <td class="px-4 py-3 text-center">13.5</td>
-                                <td class="px-4 py-3 text-center font-semibold text-brand-600 dark:text-brand-400">12.33</td>
-                                <td class="px-4 py-3 text-center text-neutral-600 dark:text-neutral-400">Assez Bien</td>
-                            </tr>
-                            <tr>
-                                <td class="px-4 py-3 font-medium text-neutral-900 dark:text-white">Physique-Chimie</td>
-                                <td class="px-4 py-3 text-center text-red-600 dark:text-red-400">08.5</td>
-                                <td class="px-4 py-3 text-center">10.0</td>
-                                <td class="px-4 py-3 text-center text-red-600 dark:text-red-400">09.0</td>
-                                <td class="px-4 py-3 text-center font-semibold text-red-600 dark:text-red-400">09.16</td>
-                                <td class="px-4 py-3 text-center text-red-600 dark:text-red-400">Insuffisant</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <div id="resultats-bulletin"></div>
         </section>
 
     </main>
@@ -294,158 +222,56 @@
     <!-- MODAL: SUBSCRIPTION (MOBILE MONEY) -->
     <div id="modal-subscription" class="fixed inset-0 z-50 hidden items-center justify-center">
         <div class="absolute inset-0 bg-neutral-900/60 backdrop-blur-sm" id="modal-backdrop"></div>
-        <div class="relative w-full max-w-md bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-xl p-6 m-4 transform transition-all">
+        <div class="relative w-full max-w-md bg-white dark:bg-neutral-950 border border-neutral-200 dark:border-neutral-800 rounded-2xl shadow-2xl p-6 m-4 transform transition-all">
             <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-semibold text-neutral-900 dark:text-white">Abonnement Annuel</h3>
+                <div class="flex items-center gap-2">
+                    <div class="w-7 h-7 bg-green-500/10 text-green-600 rounded flex items-center justify-center font-bold text-xs">237</div>
+                    <h3 class="text-lg font-bold text-neutral-900 dark:text-white">Paiement Mobile Money</h3>
+                </div>
                 <button id="btn-close-modal" class="text-neutral-400 hover:text-neutral-900 dark:hover:text-white transition-colors">
                     <i data-lucide="x" class="w-5 h-5"></i>
                 </button>
             </div>
             
-            <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-6">Renouvelez la licence de votre établissement pour débloquer la génération des bulletins illimitée.</p>
+            <p class="text-sm text-neutral-600 dark:text-neutral-400 mb-6">Abonnement annuel ou règlement de scolarité via MTN MoMo et Orange Money Cameroun.</p>
             
-            <div class="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg p-4 flex justify-between items-center mb-6">
-                <span class="font-medium text-neutral-900 dark:text-white">Montant à régler</span>
-                <span class="text-xl font-bold text-brand-600 dark:text-brand-400">50 000 FCFA</span>
+            <div class="bg-neutral-50 dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl p-4 flex justify-between items-center mb-6">
+                <span class="font-medium text-neutral-900 dark:text-white">Montant forfaitaire</span>
+                <span class="text-xl font-bold text-brand-600 dark:text-brand-400">75 000 FCFA</span>
             </div>
 
-            <form id="payment-form" class="space-y-4">
+            <form id="modal-payment-form" class="space-y-4">
                 <div>
-                    <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">Moyen de paiement</label>
+                    <label class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-2">Réseau Mobile</label>
                     <div class="grid grid-cols-2 gap-3">
-                        <label class="relative flex items-center justify-center p-3 border border-neutral-200 dark:border-neutral-800 rounded-lg cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 dark:has-[:checked]:bg-brand-900/20">
-                            <input type="radio" name="payment_method" value="om" class="sr-only" checked>
-                            <span class="text-sm font-medium text-neutral-900 dark:text-white">Orange Money</span>
+                        <label class="relative flex items-center justify-center p-3 border border-neutral-200 dark:border-neutral-800 rounded-xl cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 dark:has-[:checked]:bg-brand-900/20">
+                            <input type="radio" name="operator" value="orange" class="sr-only" checked>
+                            <span class="text-sm font-semibold text-orange-600 dark:text-orange-400">Orange Money</span>
                         </label>
-                        <label class="relative flex items-center justify-center p-3 border border-neutral-200 dark:border-neutral-800 rounded-lg cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 dark:has-[:checked]:bg-brand-900/20">
-                            <input type="radio" name="payment_method" value="momo" class="sr-only">
-                            <span class="text-sm font-medium text-neutral-900 dark:text-white">MTN MoMo</span>
+                        <label class="relative flex items-center justify-center p-3 border border-neutral-200 dark:border-neutral-800 rounded-xl cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-900 transition-colors has-[:checked]:border-brand-500 has-[:checked]:bg-brand-50 dark:has-[:checked]:bg-brand-900/20">
+                            <input type="radio" name="operator" value="mtn" class="sr-only">
+                            <span class="text-sm font-semibold text-yellow-600 dark:text-yellow-400">MTN MoMo</span>
                         </label>
                     </div>
                 </div>
                 
                 <div>
-                    <label for="phone-number" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Numéro de téléphone</label>
+                    <label for="momo-phone-number" class="block text-sm font-medium text-neutral-700 dark:text-neutral-300 mb-1">Numéro de téléphone (+237)</label>
                     <div class="relative">
-                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-neutral-500 text-sm">+237</span>
-                        <input type="tel" id="phone-number" required pattern="[6][0-9]{8}" class="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-md pl-12 pr-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-brand-500 focus:border-brand-500 transition-colors" placeholder="6XX XX XX XX">
+                        <span class="absolute inset-y-0 left-0 flex items-center pl-3 text-neutral-500 text-sm font-semibold">+237</span>
+                        <input type="tel" id="momo-phone-number" required pattern="[6][0-9]{8}" value="699001122" class="w-full bg-white dark:bg-neutral-900 border border-neutral-300 dark:border-neutral-700 rounded-lg pl-14 pr-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-brand-500 transition-colors" placeholder="6XX XX XX XX">
                     </div>
                 </div>
 
-                <button type="submit" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-medium rounded-md px-4 py-2.5 text-sm transition-colors flex justify-center items-center gap-2 mt-2">
+                <button type="submit" id="btn-confirm-payment" class="w-full bg-brand-600 hover:bg-brand-700 text-white font-semibold rounded-lg px-4 py-3 text-sm transition-colors flex justify-center items-center gap-2 mt-4 shadow-md">
                     <i data-lucide="lock" class="w-4 h-4"></i>
-                    <span>Payer 50 000 FCFA</span>
+                    <span>Valider et Payer 75 000 FCFA</span>
                 </button>
             </form>
         </div>
     </div>
 
-    <!-- GLOBAL LOADER -->
-    <div id="global-loader" class="fixed inset-0 z-[60] hidden items-center justify-center bg-white/80 dark:bg-neutral-950/80 backdrop-blur-sm">
-        <div class="flex flex-col items-center gap-3">
-            <i data-lucide="loader-2" class="w-8 h-8 text-brand-600 animate-spin"></i>
-            <span class="text-sm font-medium text-neutral-600 dark:text-neutral-400">Chargement en cours...</span>
-        </div>
-    </div>
-
-    <script>
-        // Initialisation des icônes Lucide
-        lucide.createIcons();
-
-        // Gestion du thème (Dark/Light)
-        const themeToggleBtn = document.getElementById('theme-toggle');
-        const htmlElement = document.documentElement;
-        
-        // Vérifier la préférence système ou locale
-        if (localStorage.theme === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            htmlElement.classList.add('dark');
-        } else {
-            htmlElement.classList.remove('dark');
-        }
-
-        themeToggleBtn.addEventListener('click', () => {
-            htmlElement.classList.toggle('dark');
-            if (htmlElement.classList.contains('dark')) {
-                localStorage.theme = 'dark';
-            } else {
-                localStorage.theme = 'light';
-            }
-        });
-
-        // Logique UI basique (pour démonstration, sera écrasée/étendue par static/app.js)
-        const viewLogin = document.getElementById('view-login');
-        const viewDashboard = document.getElementById('view-dashboard');
-        const viewParent = document.getElementById('view-parent');
-        const userMenu = document.getElementById('user-menu');
-        const userNameDisplay = document.getElementById('user-name-display');
-        
-        document.getElementById('login-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const role = document.getElementById('login-role').value;
-            const id = document.getElementById('login-id').value;
-            
-            // Simulation de chargement
-            document.getElementById('global-loader').classList.remove('hidden');
-            document.getElementById('global-loader').classList.add('flex');
-            
-            setTimeout(() => {
-                document.getElementById('global-loader').classList.add('hidden');
-                document.getElementById('global-loader').classList.remove('flex');
-                
-                viewLogin.classList.add('hidden-view');
-                userMenu.classList.remove('hidden');
-                userMenu.classList.add('flex');
-                
-                if (role === 'director') {
-                    viewDashboard.classList.remove('hidden-view');
-                    userNameDisplay.textContent = 'Dir. ' + id;
-                } else {
-                    viewParent.classList.remove('hidden-view');
-                    userNameDisplay.textContent = 'Parent ' + id;
-                }
-            }, 800);
-        });
-
-        document.getElementById('btn-logout').addEventListener('click', () => {
-            viewDashboard.classList.add('hidden-view');
-            viewParent.classList.add('hidden-view');
-            userMenu.classList.add('hidden');
-            userMenu.classList.remove('flex');
-            viewLogin.classList.remove('hidden-view');
-            document.getElementById('login-form').reset();
-        });
-
-        // Modal Abonnement
-        const modalSub = document.getElementById('modal-subscription');
-        const btnShowSub = document.getElementById('btn-show-subscription');
-        const btnCloseModal = document.getElementById('btn-close-modal');
-        const modalBackdrop = document.getElementById('modal-backdrop');
-
-        const openModal = () => {
-            modalSub.classList.remove('hidden');
-            modalSub.classList.add('flex');
-        };
-        const closeModal = () => {
-            modalSub.classList.add('hidden');
-            modalSub.classList.remove('flex');
-        };
-
-        if(btnShowSub) btnShowSub.addEventListener('click', openModal);
-        if(btnCloseModal) btnCloseModal.addEventListener('click', closeModal);
-        if(modalBackdrop) modalBackdrop.addEventListener('click', closeModal);
-
-        document.getElementById('payment-form').addEventListener('submit', (e) => {
-            e.preventDefault();
-            document.getElementById('global-loader').classList.remove('hidden');
-            document.getElementById('global-loader').classList.add('flex');
-            
-            setTimeout(() => {
-                document.getElementById('global-loader').classList.add('hidden');
-                document.getElementById('global-loader').classList.remove('flex');
-                closeModal();
-                alert('Paiement initié. Veuillez valider sur votre téléphone.');
-            }, 1500);
-        });
-    </script>
+    <!-- Scripts Applicatifs -->
+    <script src="/static/app.js"></script>
 </body>
 </html>

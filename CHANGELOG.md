@@ -1,0 +1,5 @@
+# Journal des Mises à Jour (CHANGELOG)
+
+### [2026-09-12 01:09] Correction critique erreur 404 Page introuvable sur la route principale. Réparer le routage du serveur web, vérifier les fichiers statiques et forcer un redéploiement propre.
+- Correction critique de l'erreur 404 et des erreurs de démarrage du serveur web : 1. Résolution des chemins statiques et templates avec des chemins absolus robustes et gestion de fallback pour les routes SPA/pages introuvables. 2. Correction des imports manquants entre app.py, database.py (modèles SQLAlchemy complets et compatibilité session/sqlite) et payment_gateway.py (fonctions initiate_mobile_money_payment et verify_mobile_money_payment). 3. Ajout de SQLAlchemy dans requirements.txt pour éliminer le crash au démarrage en conteneur. 4. Intégration correcte du script /static/app.js dans templates/index.html.
+- Fichiers modifiés : requirements.txt, database.py, payment_gateway.py, app.py, templates/index.html, static/app.js
