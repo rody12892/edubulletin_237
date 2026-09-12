@@ -648,7 +648,10 @@ async def creer_ecole(
 # ==============================================================================
 @app.get("/e/{slug}", response_class=HTMLResponse)
 async def parent_portal_view(slug: str, request: Request, db: Session = Depends(get_db)):
-    school = db.query(School).filter(School.slug == slug.strip().lower()).first()
+    clean_slug = slug.strip().lower()
+    school = db.query(School).filter(
+        (School.slug == clean_slug) | (School.code == clean_slug.upper())
+    ).first()
     if not school:
         raise HTTPException(status_code=404, detail="Établissement scolaire introuvable.")
 
@@ -667,7 +670,10 @@ async def parent_consulter_bulletin(
     sequence: int = Form(1),
     db: Session = Depends(get_db)
 ):
-    school = db.query(School).filter(School.slug == slug.strip().lower()).first()
+    clean_slug = slug.strip().lower()
+    school = db.query(School).filter(
+        (School.slug == clean_slug) | (School.code == clean_slug.upper())
+    ).first()
     if not school:
         raise HTTPException(status_code=404, detail="Établissement introuvable.")
 
