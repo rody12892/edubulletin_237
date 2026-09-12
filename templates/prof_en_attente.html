@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %}Compte En Attente d'Approbation - EDUBULLETIN 237{% endblock %}
+
+{% block content %}
+<div class="min-h-full flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8 bg-slate-50">
+    <div class="max-w-lg w-full bg-white p-8 sm:p-10 rounded-2xl shadow-xl border border-slate-200 text-center space-y-6">
+        
+        <div class="w-20 h-20 bg-amber-100 text-amber-600 rounded-3xl flex items-center justify-center mx-auto text-4xl shadow-md">
+            ⏳
+        </div>
+
+        <div>
+            <span class="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-800 uppercase tracking-wider mb-3">
+                Statut : En attente d'approbation
+            </span>
+            <h2 class="text-2xl font-extrabold text-slate-900 tracking-tight">
+                Demande transmise au Proviseur !
+            </h2>
+            <p class="mt-2 text-sm text-slate-600">
+                Bonjour {% if nom %}<strong>{{ nom }}</strong>{% else %}cher Enseignant{% endif %}, votre demande d'inscription pour rejoindre <strong>{{ ecole or "votre établissement" }}</strong> a bien été enregistrée.
+            </p>
+        </div>
+
+        <div class="bg-slate-50 border border-slate-200 rounded-xl p-4 text-left text-xs space-y-2 text-slate-700">
+            <div class="font-bold text-slate-900 flex items-center gap-1.5">
+                <i data-lucide="info" class="w-4 h-4 text-brand-600"></i>
+                Prochaines étapes pour activer votre espace :
+            </div>
+            <p>1. Le <strong>Chef d'Établissement (Proviseur)</strong> va vérifier votre identité dans sa console administrative.</p>
+            <p>2. Il vous affectera officiellement votre matière et vos classes (ex: 6ème A, 3ème B).</p>
+            <p>3. Dès cette validation effectuée, vous pourrez vous connecter avec votre identifiant pour saisir vos grilles de notes et proposer vos coefficients.</p>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3 pt-2">
+            <a href="/login" class="flex-1 py-3 px-4 rounded-xl text-white font-bold bg-brand-600 hover:bg-brand-700 transition text-sm flex items-center justify-center gap-2 shadow">
+                <i data-lucide="arrow-left" class="w-4 h-4"></i>
+                <span>Retour à la Connexion</span>
+            </a>
+            <a href="/" class="py-3 px-4 rounded-xl text-slate-700 font-semibold bg-slate-100 hover:bg-slate-200 transition text-sm">
+                Accueil
+            </a>
+        </div>
+
+    </div>
+</div>
+{% endblock %}

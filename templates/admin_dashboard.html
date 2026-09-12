@@ -46,16 +46,40 @@
         </div>
     </div>
 
+    {% if pending_profs_count and pending_profs_count > 0 %}
+    <div class="mb-6 p-4 rounded-xl bg-amber-50 border-2 border-amber-300 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-black flex-shrink-0">
+                <i data-lucide="clock" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <strong class="text-sm text-amber-950 font-black">{{ pending_profs_count }} Enseignant(s) en attente de votre approbation</strong>
+                <p class="text-xs text-amber-800">Validez leurs identités et assignez leurs classes pour leur ouvrir l'accès aux saisies.</p>
+            </div>
+        </div>
+        <a href="/admin/enseignants" class="px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white text-xs font-bold rounded-xl transition shadow flex items-center gap-1.5 whitespace-nowrap">
+            <span>Examiner & Approuver ➔</span>
+        </a>
+    </div>
+    {% endif %}
+
     <!-- Navigation par Onglets Métier -->
-    <div class="border-b border-slate-200 mb-6 flex gap-4 text-sm font-bold">
+    <div class="border-b border-slate-200 mb-6 flex flex-wrap gap-4 text-sm font-bold">
         <button onclick="switchTab('bulletins')" id="tab-btn-bulletins" class="tab-btn pb-3 border-b-2 border-brand-600 text-brand-600 flex items-center gap-2">
             <i data-lucide="award" class="w-4 h-4"></i>
             <span>Moteur de Bulletins MINESEC</span>
         </button>
         <button onclick="switchTab('profs')" id="tab-btn-profs" class="tab-btn pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2">
             <i data-lucide="users" class="w-4 h-4"></i>
-            <span>Validation Enseignants & Coefficients</span>
+            <span>Validation Coefficients</span>
         </button>
+        <a href="/admin/enseignants" class="pb-3 border-b-2 border-transparent text-slate-500 hover:text-brand-600 flex items-center gap-2">
+            <i data-lucide="user-check" class="w-4 h-4"></i>
+            <span>Équipe Enseignante</span>
+            {% if pending_profs_count and pending_profs_count > 0 %}
+            <span class="px-1.5 py-0.2 bg-amber-500 text-white text-[10px] font-bold rounded-full">{{ pending_profs_count }}</span>
+            {% endif %}
+        </a>
         <button onclick="switchTab('notes')" id="tab-btn-notes" class="tab-btn pb-3 border-b-2 border-transparent text-slate-500 hover:text-slate-700 flex items-center gap-2">
             <i data-lucide="check-square" class="w-4 h-4"></i>
             <span>Validation des Grilles de Notes</span>

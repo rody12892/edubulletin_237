@@ -5,7 +5,7 @@ from typing import Generator, List, Dict, Any, Optional
 
 from sqlalchemy import (
     create_engine, Column, Integer, String, Float, Boolean, 
-    ForeignKey, DateTime, Text, func
+    ForeignKey, DateTime, Text, func, text
 )
 from sqlalchemy.orm import declarative_base, sessionmaker, relationship, Session, synonym
 from sqlalchemy import event
@@ -97,6 +97,8 @@ class User(Base):
     identifiant = Column(String(100), unique=True, nullable=False, index=True)  # Email ou téléphone E.164 (+2376XXXXXXXX)
     password_hash = Column(String(255), nullable=False)
     role = Column(String(30), nullable=False)  # superadmin, proviseur, secretaire, professeur, parent
+    statut = Column(String(20), default="actif")  # actif, en_attente, rejete
+    matiere_souhaitee = Column(String(100), nullable=True)  # Pour les profs en attente d'approbation
     created_at = Column(DateTime, server_default=func.now())
 
     @property
@@ -117,7 +119,7 @@ class User(Base):
 
     @property
     def est_actif(self):
-        return True
+        return self.statut == "actif"
 
     school = relationship("School", back_populates="users")
     assignments = relationship("TeacherAssignment", back_populates="teacher", cascade="all, delete-orphan")
@@ -263,6 +265,21 @@ def verify_pw(password: str, hashed: str) -> bool:
 def init_db() -> None:
     """Crée les tables et initialise les données de démarrage complètes si la base est vide."""
     Base.metadata.create_all(bind=engine)
+
+    # Migrations douces colonnes ajoutées pour les bases SQLite / PostgreSQL existantes
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("ALTER TABLE users ADD COLUMN statut VARCHAR(20) DEFAULT 'actif';"))
+            conn.commit()
+    except Exception:
+        pass
+
+    try:
+        with engine.connect() as conn:
+            conn.execute(text("ALTER TABLE users ADD COLUMN matiere_souhaitee VARCHAR(100);"))
+            conn.commit()
+    except Exception:
+        pass
 
     with SessionLocal() as db:
         if db.query(School).count() == 0:

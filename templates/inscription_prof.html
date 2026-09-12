@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+
+{% block title %}Inscription Enseignant - EDUBULLETIN 237{% endblock %}
+
+{% block content %}
+<div class="min-h-full flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-slate-50">
+    <div class="max-w-xl w-full space-y-8 bg-white p-8 sm:p-10 rounded-2xl shadow-xl border border-slate-200">
+        
+        <!-- Header -->
+        <div class="text-center">
+            <div class="mx-auto w-16 h-16 rounded-2xl bg-gradient-to-tr from-brand-600 to-emerald-600 flex items-center justify-center text-white text-2xl font-black shadow-lg shadow-brand-500/20 mb-4">
+                👨‍🏫
+            </div>
+            <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
+                Portail Enseignant
+            </h2>
+            <p class="mt-2 text-sm text-slate-600">
+                Inscrivez-vous pour rejoindre l'équipe pédagogique de votre établissement. Votre compte sera soumis à l'approbation du Proviseur.
+            </p>
+        </div>
+
+        {% if error %}
+        <div class="rounded-xl bg-red-50 p-4 border border-red-200 flex items-start gap-3">
+            <i data-lucide="alert-circle" class="w-5 h-5 text-red-600 mt-0.5 flex-shrink-0"></i>
+            <div class="text-sm font-medium text-red-800">{{ error }}</div>
+        </div>
+        {% endif %}
+
+        <form action="/inscription-prof" method="POST" class="space-y-5">
+            <!-- Établissement -->
+            <div>
+                <label for="ecole_id" class="block text-sm font-bold text-slate-700 mb-1">
+                    Établissement Scolaire <span class="text-red-500">*</span>
+                </label>
+                <select id="ecole_id" name="ecole_id" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm font-medium bg-white">
+                    {% for s in schools %}
+                        <option value="{{ s.id }}">{{ s.name }} ({{ s.code }} - {{ s.ville }})</option>
+                    {% endfor %}
+                </select>
+                <p class="text-xs text-slate-500 mt-1">Sélectionnez le lycée ou collège dans lequel vous enseignez.</p>
+            </div>
+
+            <!-- Nom Complet -->
+            <div>
+                <label for="nom_complet" class="block text-sm font-bold text-slate-700 mb-1">
+                    Nom et Prénom complets <span class="text-red-500">*</span>
+                </label>
+                <input type="text" id="nom_complet" name="nom_complet" placeholder="Ex: M. KAMGA Jean-Paul" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm">
+            </div>
+
+            <!-- Identifiant Téléphone / Email -->
+            <div>
+                <label for="identifiant" class="block text-sm font-bold text-slate-700 mb-1">
+                    Numéro de Téléphone (ou Email) <span class="text-red-500">*</span>
+                </label>
+                <input type="text" id="identifiant" name="identifiant" placeholder="Ex: +237690123456" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm">
+                <p class="text-xs text-slate-500 mt-1">Sert d'identifiant de connexion unique.</p>
+            </div>
+
+            <!-- Matière Principale -->
+            <div>
+                <label for="matiere_souhaitee" class="block text-sm font-bold text-slate-700 mb-1">
+                    Discipline / Matière Principale enseignée <span class="text-red-500">*</span>
+                </label>
+                <select id="matiere_souhaitee" name="matiere_souhaitee" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm bg-white">
+                    <option value="Mathématiques">Mathématiques</option>
+                    <option value="Français">Français</option>
+                    <option value="Physique-Chimie">Physique-Chimie</option>
+                    <option value="Sciences de la Vie et de la Terre (SVT)">Sciences de la Vie et de la Terre (SVT)</option>
+                    <option value="Anglais">Anglais</option>
+                    <option value="Informatique">Informatique</option>
+                    <option value="Histoire-Géographie">Histoire-Géographie</option>
+                    <option value="Littérature">Littérature</option>
+                    <option value="Allemand">Allemand</option>
+                    <option value="Espagnol">Espagnol</option>
+                    <option value="Éducation à la Citoyenneté (ECM)">Éducation à la Citoyenneté (ECM)</option>
+                    <option value="EPS">Éducation Physique et Sportive (EPS)</option>
+                    <option value="Philosophie">Philosophie</option>
+                    <option value="Autre">Autre matière</option>
+                </select>
+            </div>
+
+            <!-- Mot de passe -->
+            <div>
+                <label for="mot_de_passe" class="block text-sm font-bold text-slate-700 mb-1">
+                    Mot de passe secret <span class="text-red-500">*</span>
+                </label>
+                <input type="password" id="mot_de_passe" name="mot_de_passe" placeholder="••••••••" required class="w-full px-4 py-2.5 rounded-xl border border-slate-300 focus:ring-2 focus:ring-brand-500 focus:border-brand-500 text-sm">
+            </div>
+
+            <!-- Note Réglementaire -->
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-3.5 text-xs text-amber-800 flex items-start gap-2">
+                <i data-lucide="shield-alert" class="w-4 h-4 text-amber-600 mt-0.5 flex-shrink-0"></i>
+                <div>
+                    <strong>Procédure de sécurité MINESEC :</strong> Votre inscription sera immédiatement transmise au Proviseur. Vous ne pourrez accéder à la saisie des notes qu'une fois votre affectation officiellement approuvée.
+                </div>
+            </div>
+
+            <!-- Bouton Validation -->
+            <button type="submit" class="w-full py-3 px-4 rounded-xl text-white font-bold bg-brand-600 hover:bg-brand-700 shadow-lg shadow-brand-500/25 transition text-sm flex items-center justify-center gap-2">
+                <i data-lucide="user-check" class="w-4 h-4"></i>
+                <span>Soumettre mon Inscription</span>
+            </button>
+        </form>
+
+        <div class="text-center pt-2 border-t border-slate-200 text-xs text-slate-500">
+            Déjà inscrit et validé ?
+            <a href="/login" class="font-bold text-brand-600 hover:text-brand-700 ml-1">Connectez-vous ici</a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -58,27 +58,104 @@
                         </div>
                         <div>
                             <span class="font-extrabold text-lg text-slate-900 tracking-tight">EDUBULLETIN</span>
-                            <span class="text-xs block text-emerald-700 font-semibold tracking-wider uppercase -mt-1">MINESEC Officiel</span>
+                            <span class="text-[10px] block text-emerald-700 font-bold tracking-wider uppercase -mt-1">MINESEC Cameroun</span>
                         </div>
                     </a>
 
                     {% if school %}
-                    <div class="hidden md:flex items-center ml-4 pl-4 border-l border-slate-200">
-                        <span class="text-sm font-semibold text-slate-700 truncate max-w-xs">{{ school.name }}</span>
+                    <div class="hidden lg:flex items-center ml-3 pl-3 border-l border-slate-200">
+                        <span class="text-xs font-bold text-slate-700 truncate max-w-xs">{{ school.name }}</span>
                         {% if school.statut_licence == 'actif' %}
-                            <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
+                            <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
                                 Licence Active
                             </span>
                         {% elif school.statut_licence == 'en_grace' %}
-                            <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                                Période de grâce (7j)
+                            <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-amber-100 text-amber-800">
+                                Grâce (7j)
                             </span>
                         {% else %}
-                            <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                Licence Expirée
+                            <span class="ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-red-100 text-red-800">
+                                Expirée
                             </span>
                         {% endif %}
                     </div>
+                    {% endif %}
+                </div>
+
+                <!-- Navigation Links (Contextuel selon le rôle) -->
+                <div class="hidden md:flex items-center space-x-1 lg:space-x-2 text-xs font-bold">
+                    {% if current_user %}
+                        {% if current_user.role == 'proviseur' %}
+                            <a href="/admin/dashboard" class="px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-100 hover:text-brand-700 transition flex items-center gap-1.5">
+                                <i data-lucide="layout-dashboard" class="w-3.5 h-3.5"></i>
+                                <span>Dashboard</span>
+                            </a>
+                            <a href="/admin/enseignants" class="px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-100 hover:text-brand-700 transition flex items-center gap-1.5">
+                                <i data-lucide="user-check" class="w-3.5 h-3.5"></i>
+                                <span>Enseignants</span>
+                                {% if pending_profs_count and pending_profs_count > 0 %}
+                                <span class="bg-amber-500 text-white rounded-full text-[10px] px-1.5 py-0.2 animate-pulse">{{ pending_profs_count }}</span>
+                                {% endif %}
+                            </a>
+                            <a href="/secretaire/eleves" class="px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-100 hover:text-brand-700 transition flex items-center gap-1.5">
+                                <i data-lucide="users" class="w-3.5 h-3.5"></i>
+                                <span>Élèves</span>
+                            </a>
+                            <a href="/secretaire/bulletins" class="px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-100 hover:text-brand-700 transition flex items-center gap-1.5">
+                                <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                                <span>Bulletins</span>
+                            </a>
+                            <a href="/e/{{ school.slug if school else 'led' }}" target="_blank" class="px-2.5 py-1.5 rounded-lg text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition flex items-center gap-1 font-semibold text-[11px]">
+                                <span>Portail Parents</span>
+                                <i data-lucide="external-link" class="w-3 h-3"></i>
+                            </a>
+
+                        {% elif current_user.role == 'secretaire' %}
+                            <a href="/secretaire/eleves" class="px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-100 hover:text-brand-700 transition flex items-center gap-1.5">
+                                <i data-lucide="users" class="w-3.5 h-3.5"></i>
+                                <span>Gestion Élèves</span>
+                            </a>
+                            <a href="/secretaire/bulletins" class="px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-100 hover:text-brand-700 transition flex items-center gap-1.5">
+                                <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+                                <span>Tirage Bulletins</span>
+                            </a>
+                            <a href="/e/{{ school.slug if school else 'led' }}" target="_blank" class="px-2.5 py-1.5 rounded-lg text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition flex items-center gap-1 font-semibold text-[11px]">
+                                <span>Portail Parents</span>
+                                <i data-lucide="external-link" class="w-3 h-3"></i>
+                            </a>
+
+                        {% elif current_user.role == 'professeur' %}
+                            <a href="/prof/classes" class="px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-100 hover:text-brand-700 transition flex items-center gap-1.5">
+                                <i data-lucide="book-open" class="w-3.5 h-3.5"></i>
+                                <span>Mes Classes & Notes</span>
+                            </a>
+                            <a href="/e/{{ school.slug if school else 'led' }}" target="_blank" class="px-2.5 py-1.5 rounded-lg text-emerald-700 bg-emerald-50 hover:bg-emerald-100 transition flex items-center gap-1 font-semibold text-[11px]">
+                                <span>Portail Parents</span>
+                                <i data-lucide="external-link" class="w-3 h-3"></i>
+                            </a>
+
+                        {% elif current_user.role == 'superadmin' %}
+                            <a href="/superadmin/overview" class="px-3 py-2 rounded-lg text-slate-700 hover:bg-slate-100 hover:text-brand-700 transition flex items-center gap-1.5">
+                                <i data-lucide="shield" class="w-3.5 h-3.5"></i>
+                                <span>SuperAdmin</span>
+                            </a>
+                            <a href="/demo/proviseur" class="px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+                                Vue Proviseur
+                            </a>
+                            <a href="/demo/secretaire" class="px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+                                Vue Secrétaire
+                            </a>
+                            <a href="/demo/prof" class="px-3 py-2 rounded-lg text-slate-600 hover:bg-slate-100 transition">
+                                Vue Prof
+                            </a>
+                        {% endif %}
+                    {% else %}
+                        <a href="/" class="px-3 py-2 rounded-lg text-slate-600 hover:text-brand-600 transition">Accueil</a>
+                        <a href="/e/led" class="px-3 py-2 rounded-lg text-slate-600 hover:text-brand-600 transition">Espace Parents</a>
+                        <a href="/inscription-prof" class="px-3 py-2 rounded-lg text-brand-700 bg-brand-50 hover:bg-brand-100 transition flex items-center gap-1">
+                            <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+                            <span>Inscription Professeur</span>
+                        </a>
                     {% endif %}
                 </div>
 
@@ -86,17 +163,17 @@
                 <div class="flex items-center gap-3">
                     {% if current_user %}
                         <div class="text-right hidden sm:block">
-                            <div class="text-sm font-bold text-slate-900">{{ current_user.nom_complet }}</div>
-                            <div class="text-xs text-brand-600 font-semibold uppercase tracking-wider">{{ current_user.role }}</div>
+                            <div class="text-xs font-black text-slate-900 leading-tight">{{ current_user.nom_complet }}</div>
+                            <div class="text-[10px] text-brand-600 font-bold uppercase tracking-wider">{{ current_user.role }}</div>
                         </div>
                         <a href="/logout" class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-slate-100 text-slate-700 hover:bg-red-50 hover:text-red-700 transition">
-                            <i data-lucide="log-out" class="w-4 h-4"></i>
+                            <i data-lucide="log-out" class="w-3.5 h-3.5"></i>
                             <span class="hidden sm:inline">Déconnexion</span>
                         </a>
                     {% else %}
-                        <a href="/login" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold bg-brand-600 text-white hover:bg-brand-700 shadow-sm transition">
-                            <i data-lucide="lock" class="w-4 h-4"></i>
-                            <span>Connexion</span>
+                        <a href="/login" class="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-xs font-bold bg-brand-600 text-white hover:bg-brand-700 shadow-sm transition">
+                            <i data-lucide="lock" class="w-3.5 h-3.5"></i>
+                            <span>Connexion Staff</span>
                         </a>
                     {% endif %}
                 </div>

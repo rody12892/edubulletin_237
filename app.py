@@ -3,6 +3,7 @@ import io
 import csv
 import json
 import logging
+import urllib.parse
 from datetime import datetime, timedelta
 from typing import Optional, List, Dict, Any
 
@@ -130,6 +131,79 @@ async def login_page(request: Request, db: Session = Depends(get_db)):
         return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
     return render_template(request, "login.html", {"request": request})
 
+@app.get("/inscription-prof", response_class=HTMLResponse)
+async def inscription_prof_form(request: Request, db: Session = Depends(get_db)):
+    schools = db.query(School).all()
+    return render_template(request, "inscription_prof.html", {
+        "request": request,
+        "schools": schools,
+        "error": None
+    })
+
+@app.post("/inscription-prof", response_class=HTMLResponse)
+async def inscription_prof_submit(
+    request: Request,
+    ecole_id: int = Form(...),
+    nom_complet: str = Form(...),
+    identifiant: str = Form(...),
+    matiere_souhaitee: str = Form(...),
+    mot_de_passe: str = Form(...),
+    db: Session = Depends(get_db)
+):
+    schools = db.query(School).all()
+    clean_id = identifiant.strip()
+    if not clean_id or not nom_complet or not mot_de_passe:
+        return render_template(request, "inscription_prof.html", {
+            "request": request,
+            "schools": schools,
+            "error": "Veuillez renseigner tous les champs obligatoires."
+        })
+
+    existing = db.query(User).filter(User.identifiant == clean_id).first()
+    if existing:
+        return render_template(request, "inscription_prof.html", {
+            "request": request,
+            "schools": schools,
+            "error": f"L'identifiant '{clean_id}' est déjà utilisé. Veuillez vous connecter."
+        })
+
+    school = db.query(School).filter(School.id == ecole_id).first()
+    if not school:
+        return render_template(request, "inscription_prof.html", {
+            "request": request,
+            "schools": schools,
+            "error": "Établissement scolaire sélectionné invalide."
+        })
+
+    new_user = User(
+        ecole_id=school.id,
+        nom_complet=nom_complet.strip(),
+        identifiant=clean_id,
+        password_hash=hash_pw(mot_de_passe.strip()),
+        role="professeur",
+        statut="en_attente",
+        matiere_souhaitee=matiere_souhaitee.strip()
+    )
+    db.add(new_user)
+    db.commit()
+    db.refresh(new_user)
+
+    target = f"/prof/en-attente?nom={urllib.parse.quote(new_user.nom_complet)}&ecole={urllib.parse.quote(school.name)}"
+    return RedirectResponse(target, status_code=status.HTTP_302_FOUND)
+
+@app.get("/prof/en-attente", response_class=HTMLResponse)
+async def prof_en_attente_view(
+    request: Request,
+    nom: Optional[str] = "",
+    ecole: Optional[str] = "",
+    db: Session = Depends(get_db)
+):
+    return render_template(request, "prof_en_attente.html", {
+        "request": request,
+        "nom": nom,
+        "ecole": ecole
+    })
+
 @app.post("/login", response_class=HTMLResponse)
 async def login_form_post(
     request: Request,
@@ -154,6 +228,14 @@ async def login_form_post(
 
     school = db.query(School).filter(School.id == user.ecole_id).first() if user.ecole_id else None
     check_school_license(school)
+
+    # Si le professeur est encore en attente d'approbation par le Proviseur
+    if user.role == "professeur" and getattr(user, "statut", "actif") == "en_attente":
+        school_name = school.name if school else "votre établissement"
+        return RedirectResponse(
+            f"/prof/en-attente?nom={urllib.parse.quote(user.nom_complet)}&ecole={urllib.parse.quote(school_name)}",
+            status_code=status.HTTP_302_FOUND
+        )
 
     redirect_map = {
         "superadmin": "/superadmin/overview",
@@ -234,6 +316,12 @@ async def api_login(payload: LoginPayload, response: Response, db: Session = Dep
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Identifiant ou mot de passe incorrect."
+        )
+
+    if user.role == "professeur" and getattr(user, "statut", "actif") == "en_attente":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Votre compte enseignant est en attente d'approbation par le Proviseur de votre établissement."
         )
 
     if not user.est_actif:
@@ -330,6 +418,13 @@ async def admin_dashboard(request: Request, user: User = Depends(require_role(["
     # Coefficients en attente
     pending_coeffs = [a for a in assignments if a.statut == "en_attente"]
 
+    # Demandes d'enseignants en attente
+    pending_profs_count = db.query(User).filter(
+        User.ecole_id == user.ecole_id,
+        User.role == "professeur",
+        User.statut == "en_attente"
+    ).count()
+
     return render_template(request, "admin_dashboard.html", {
         "request": request,
         "user": user,
@@ -342,8 +437,110 @@ async def admin_dashboard(request: Request, user: User = Depends(require_role(["
         "publications": publications,
         "total_students": total_students,
         "pending_coeffs": pending_coeffs,
+        "pending_profs_count": pending_profs_count,
         "packs": PACKS_CONFIG
     })
+
+@app.get("/admin/enseignants", response_class=HTMLResponse)
+async def admin_enseignants_view(
+    request: Request,
+    user: User = Depends(require_role(["proviseur", "superadmin"])),
+    db: Session = Depends(get_db)
+):
+    school = db.query(School).filter(School.id == user.ecole_id).first() if user.ecole_id else db.query(School).first()
+    check_school_license(school)
+
+    ecole_id = school.id if school else user.ecole_id
+
+    pending_profs = db.query(User).filter(
+        User.ecole_id == ecole_id,
+        User.role == "professeur",
+        User.statut == "en_attente"
+    ).order_by(User.id.desc()).all()
+
+    active_profs = db.query(User).filter(
+        User.ecole_id == ecole_id,
+        User.role == "professeur",
+        User.statut == "actif"
+    ).all()
+
+    classes = db.query(Classroom).filter(Classroom.ecole_id == ecole_id).all()
+    subjects = db.query(Subject).filter(Subject.ecole_id == ecole_id).all()
+    assignments = db.query(TeacherAssignment).join(Classroom).filter(Classroom.ecole_id == ecole_id).all()
+
+    return render_template(request, "admin_enseignants.html", {
+        "request": request,
+        "user": user,
+        "current_user": user,
+        "school": school,
+        "pending_profs": pending_profs,
+        "active_profs": active_profs,
+        "classes": classes,
+        "subjects": subjects,
+        "assignments": assignments,
+        "pending_profs_count": len(pending_profs)
+    })
+
+@app.post("/api/admin/approuver-prof")
+async def approuver_prof(
+    prof_id: int = Form(...),
+    classe_id: Optional[int] = Form(None),
+    matiere_id: Optional[int] = Form(None),
+    coeff: int = Form(default=2),
+    user: User = Depends(require_role(["proviseur", "superadmin"])),
+    db: Session = Depends(get_db)
+):
+    prof = db.query(User).filter(
+        User.id == prof_id,
+        User.role == "professeur"
+    ).first()
+    if not prof:
+        raise HTTPException(status_code=404, detail="Demande d'enseignant introuvable.")
+
+    prof.statut = "actif"
+    db.commit()
+
+    if classe_id and matiere_id:
+        existing_aff = db.query(TeacherAssignment).filter(
+            TeacherAssignment.classe_id == classe_id,
+            TeacherAssignment.matiere_id == matiere_id
+        ).first()
+        if existing_aff:
+            existing_aff.utilisateur_id = prof.id
+            existing_aff.coeff_valide = coeff
+            existing_aff.coeff_propose = coeff
+            existing_aff.statut = "valide"
+        else:
+            new_aff = TeacherAssignment(
+                classe_id=classe_id,
+                matiere_id=matiere_id,
+                utilisateur_id=prof.id,
+                coeff_propose=coeff,
+                coeff_valide=coeff,
+                statut="valide"
+            )
+            db.add(new_aff)
+        db.commit()
+
+    return {"success": True, "message": f"Professeur {prof.nom_complet} approuvé et activé avec succès."}
+
+@app.post("/api/admin/rejeter-prof")
+async def rejeter_prof(
+    prof_id: int = Form(...),
+    motif: str = Form("Dossier non retenu"),
+    user: User = Depends(require_role(["proviseur", "superadmin"])),
+    db: Session = Depends(get_db)
+):
+    prof = db.query(User).filter(
+        User.id == prof_id,
+        User.role == "professeur"
+    ).first()
+    if not prof:
+        raise HTTPException(status_code=404, detail="Demande introuvable.")
+
+    prof.statut = "rejete"
+    db.commit()
+    return {"success": True, "message": f"Inscription de {prof.nom_complet} rejetée."}
 
 @app.post("/api/admin/valider-coeff/{assignment_id}")
 async def valider_coeff(assignment_id: int, user: User = Depends(require_role(["proviseur"])), db: Session = Depends(get_db)):
@@ -451,6 +648,28 @@ async def secretaire_dashboard(request: Request, user: User = Depends(require_ro
         "school": school,
         "classes": classes,
         "students": students
+    })
+
+@app.get("/secretaire/bulletins", response_class=HTMLResponse)
+async def secretaire_bulletins_hub(
+    request: Request,
+    user: User = Depends(require_role(["secretaire", "proviseur", "superadmin"])),
+    db: Session = Depends(get_db)
+):
+    school = db.query(School).filter(School.id == user.ecole_id).first() if user.ecole_id else db.query(School).first()
+    check_school_license(school)
+
+    ecole_id = school.id if school else user.ecole_id
+    classes = db.query(Classroom).filter(Classroom.ecole_id == ecole_id).all()
+    publications = db.query(SequencePublication).filter(SequencePublication.ecole_id == ecole_id).all()
+
+    return render_template(request, "secretaire_bulletins.html", {
+        "request": request,
+        "user": user,
+        "current_user": user,
+        "school": school,
+        "classes": classes,
+        "publications": publications
     })
 
 @app.post("/api/secretaire/ajouter-eleve")
@@ -869,6 +1088,61 @@ async def imprimer_bulletin(
         "sequence_num": sequence,
         "grouped_results": grouped_results,
         "student_summary": student_summary_augmented,
+        "class_stats": {
+            "effectif": calc["classe"]["effectif"],
+            "moyenne_generale": calc["stats"]["moyenne_generale"],
+            "moyenne_max": calc["stats"]["moyenne_max"],
+            "moyenne_min": calc["stats"]["moyenne_min"],
+            "taux_reussite": calc["stats"]["taux_reussite"],
+            "nb_admis": sum(1 for b in calc["bulletins"] if b["moyenne"] >= 10.0)
+        },
+        "today_date": datetime.now().strftime("%d/%m/%Y")
+    })
+
+@app.get("/bulletin/print/classe/{classe_id}/{sequence}", response_class=HTMLResponse)
+async def imprimer_bulletins_classe(
+    classe_id: int,
+    sequence: int,
+    request: Request,
+    db: Session = Depends(get_db)
+):
+    classroom = db.query(Classroom).filter(Classroom.id == classe_id).first()
+    if not classroom:
+        raise HTTPException(status_code=404, detail="Classe introuvable.")
+    school = db.query(School).filter(School.id == classroom.ecole_id).first()
+
+    calc = calculate_sequence_bulletins(db, school.id, classroom.id, sequence)
+    
+    bulletins_list = []
+    for b in calc["bulletins"]:
+        student = db.query(Student).filter(Student.id == b["student"]["id"]).first()
+        grouped_results = {}
+        for grp_key, grp_data in b["groupes"].items():
+            grouped_results[grp_data["titre"]] = grp_data["matieres"]
+
+        rang_str = f"{b['rang']}{'er' if b['rang'] == 1 else 'ème'}"
+        if b.get("ex_aequo"):
+            rang_str += " ex"
+
+        bulletins_list.append({
+            "student": student,
+            "grouped_results": grouped_results,
+            "summary": {
+                "total_points": b["total_points"],
+                "total_coeff": b["total_coefs"],
+                "moyenne": b["moyenne"],
+                "rang_formate": rang_str,
+                "mention": b["appreciation"],
+                "appreciation_generale": f"Travail {b['appreciation']}."
+            }
+        })
+
+    return render_template(request, "bulletin_classe_print.html", {
+        "request": request,
+        "school": school,
+        "classroom": classroom,
+        "sequence_num": sequence,
+        "bulletins": bulletins_list,
         "class_stats": {
             "effectif": calc["classe"]["effectif"],
             "moyenne_generale": calc["stats"]["moyenne_generale"],

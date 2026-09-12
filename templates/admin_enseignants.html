@@ -1,0 +1,250 @@
+{% extends "base.html" %}
+
+{% block title %}Gestion des Enseignants & Approbations - {{ school.name }}{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+
+    <!-- Header & Breadcrumbs -->
+    <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-5">
+        <div>
+            <div class="flex items-center gap-2 text-xs font-semibold text-brand-600 mb-1">
+                <a href="/admin/dashboard" class="hover:underline">Dashboard Proviseur</a>
+                <span>/</span>
+                <span class="text-slate-500">Équipe Pédagogique</span>
+            </div>
+            <h1 class="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight flex items-center gap-3">
+                <span>Gestion des Enseignants & Approbations</span>
+                {% if pending_profs %}
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800 animate-pulse">
+                    {{ pending_profs|length }} en attente
+                </span>
+                {% endif %}
+            </h1>
+            <p class="text-sm text-slate-600 mt-1">
+                Validez les demandes d'inscription des professeurs et configurez leurs affectations par classe et matière.
+            </p>
+        </div>
+        <div class="flex gap-2">
+            <a href="/admin/dashboard" class="px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl text-sm font-semibold transition flex items-center gap-1.5">
+                <i data-lucide="layout-dashboard" class="w-4 h-4"></i>
+                <span>Tableau de Bord</span>
+            </a>
+            <a href="/inscription-prof" target="_blank" class="px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-sm font-bold shadow-sm transition flex items-center gap-1.5">
+                <i data-lucide="user-plus" class="w-4 h-4"></i>
+                <span>Lien Inscription Prof ↗</span>
+            </a>
+        </div>
+    </div>
+
+    <!-- Alert Demandes En Attente -->
+    {% if pending_profs %}
+    <div class="bg-amber-50 border-2 border-amber-300 rounded-2xl p-6 shadow-sm">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-black">
+                <i data-lucide="clock" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <h2 class="text-lg font-extrabold text-amber-950">
+                    {{ pending_profs|length }} Demande(s) d'inscription en attente d'approbation
+                </h2>
+                <p class="text-xs text-amber-800">
+                    Ces enseignants se sont inscrits en ligne et attendent votre autorisation officielle pour accéder à l'établissement.
+                </p>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {% for p in pending_profs %}
+            <div class="bg-white rounded-xl p-5 border border-amber-200 shadow-sm flex flex-col justify-between space-y-4">
+                <div>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <div class="text-base font-bold text-slate-900">{{ p.nom_complet }}</div>
+                            <div class="text-xs text-slate-500 mt-0.5">Identifiant : <span class="font-mono text-slate-800">{{ p.identifiant }}</span></div>
+                        </div>
+                        <span class="px-2 py-1 bg-amber-100 text-amber-800 text-[11px] font-bold rounded-lg">
+                            En Attente
+                        </span>
+                    </div>
+
+                    <div class="mt-3 py-2 px-3 bg-slate-50 rounded-lg text-xs flex items-center justify-between text-slate-700">
+                        <span>Discipline souhaitée :</span>
+                        <strong class="text-brand-700">{{ p.matiere_souhaitee or 'Non précisée' }}</strong>
+                    </div>
+                </div>
+
+                <!-- Formulaire d'Approbation Immédiate -->
+                <form onsubmit="handleApprove(event, {{ p.id }})" class="space-y-3 pt-3 border-t border-slate-100">
+                    <div class="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Classe à affecter</label>
+                            <select id="classe_{{ p.id }}" required class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs bg-white">
+                                {% for c in classes %}
+                                <option value="{{ c.id }}">{{ c.nom }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="block font-semibold text-slate-700 mb-1">Matière</label>
+                            <select id="matiere_{{ p.id }}" required class="w-full px-2.5 py-1.5 rounded-lg border border-slate-300 text-xs bg-white">
+                                {% for s in subjects %}
+                                <option value="{{ s.id }}">{{ s.nom }} ({{ s.code }})</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2">
+                        <div class="w-24">
+                            <label class="block text-[10px] font-semibold text-slate-600 mb-0.5">Coeff.</label>
+                            <input type="number" id="coeff_{{ p.id }}" value="2" min="1" max="6" class="w-full px-2 py-1 rounded border border-slate-300 text-xs">
+                        </div>
+                        <button type="submit" class="flex-1 mt-3.5 py-2 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-lg text-xs shadow transition flex items-center justify-center gap-1.5">
+                            <i data-lucide="check" class="w-4 h-4"></i>
+                            <span>Approuver & Affecter</span>
+                        </button>
+                        <button type="button" onclick="handleReject({{ p.id }})" class="mt-3.5 py-2 px-3 bg-red-100 hover:bg-red-200 text-red-700 font-bold rounded-lg text-xs transition flex items-center justify-center gap-1" title="Rejeter">
+                            <i data-lucide="x" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% else %}
+    <div class="bg-emerald-50 border border-emerald-200 rounded-2xl p-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-full bg-emerald-600 text-white flex items-center justify-center text-sm font-bold">
+                ✓
+            </div>
+            <div class="text-xs font-semibold text-emerald-900">
+                Aucune demande d'inscription en attente. Tous les professeurs enregistrés ont été traités.
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Corps Enseignant Actif & Affectations -->
+    <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+        <div class="p-6 border-b border-slate-200 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+            <div>
+                <h2 class="text-lg font-black text-slate-900">
+                    Corps Enseignant Actif ({{ active_profs|length }})
+                </h2>
+                <p class="text-xs text-slate-500 mt-0.5">
+                    Professeurs approuvés ayant accès à la saisie des notes et propositions de coefficients.
+                </p>
+            </div>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-600 font-bold uppercase tracking-wider border-b border-slate-200">
+                    <tr>
+                        <th class="py-3.5 px-6">Enseignant</th>
+                        <th class="py-3.5 px-6">Téléphone / Identifiant</th>
+                        <th class="py-3.5 px-6">Classes & Matières Assignées</th>
+                        <th class="py-3.5 px-6">Statut Compte</th>
+                        <th class="py-3.5 px-6 text-right">Actions</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-200 font-medium">
+                    {% for p in active_profs %}
+                    <tr class="hover:bg-slate-50 transition">
+                        <td class="py-4 px-6">
+                            <div class="font-bold text-slate-900 text-sm">{{ p.nom_complet }}</div>
+                            <div class="text-slate-500 text-[11px]">Inscrit le {{ p.created_at.strftime('%d/%m/%Y') if p.created_at else '2026' }}</div>
+                        </td>
+                        <td class="py-4 px-6 font-mono text-slate-700">
+                            {{ p.identifiant }}
+                        </td>
+                        <td class="py-4 px-6">
+                            <div class="flex flex-wrap gap-1.5">
+                                {% set count = namespace(val=0) %}
+                                {% for a in assignments if a.utilisateur_id == p.id %}
+                                    {% set count.val = count.val + 1 %}
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-brand-50 text-brand-700 border border-brand-200 text-[11px] font-semibold">
+                                        <strong>{{ a.classroom.nom }}</strong> - {{ a.subject.nom }} (Coeff {{ a.coeff_valide or a.coeff_propose }})
+                                    </span>
+                                {% endfor %}
+                                {% if count.val == 0 %}
+                                    <span class="text-slate-400 italic">Aucune classe affectée</span>
+                                {% endif %}
+                            </div>
+                        </td>
+                        <td class="py-4 px-6">
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-800">
+                                Actif & Autorisé
+                            </span>
+                        </td>
+                        <td class="py-4 px-6 text-right">
+                            <a href="/admin/dashboard#affectations" class="text-brand-600 hover:text-brand-800 font-bold text-xs inline-flex items-center gap-1">
+                                <span>Affecter</span>
+                                <i data-lucide="arrow-right" class="w-3.5 h-3.5"></i>
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<script>
+async function handleApprove(e, profId) {
+    e.preventDefault();
+    const classeId = document.getElementById(`classe_${profId}`).value;
+    const matiereId = document.getElementById(`matiere_${profId}`).value;
+    const coeff = document.getElementById(`coeff_${profId}`).value;
+
+    const fd = new FormData();
+    fd.append("prof_id", profId);
+    fd.append("classe_id", classeId);
+    fd.append("matiere_id", matiereId);
+    fd.append("coeff", coeff);
+
+    try {
+        const resp = await fetch("/api/admin/approuver-prof", {
+            method: "POST",
+            body: fd
+        });
+        const res = await resp.json();
+        if (res.success) {
+            alert(res.message);
+            window.location.reload();
+        } else {
+            alert(res.detail || "Erreur lors de l'approbation");
+        }
+    } catch(err) {
+        alert("Erreur de communication avec le serveur.");
+    }
+}
+
+async function handleReject(profId) {
+    if (!confirm("Êtes-vous sûr de vouloir rejeter cette inscription ?")) return;
+
+    const fd = new FormData();
+    fd.append("prof_id", profId);
+
+    try {
+        const resp = await fetch("/api/admin/rejeter-prof", {
+            method: "POST",
+            body: fd
+        });
+        const res = await resp.json();
+        if (res.success) {
+            alert(res.message);
+            window.location.reload();
+        } else {
+            alert(res.detail || "Erreur lors du rejet");
+        }
+    } catch(err) {
+        alert("Erreur de communication avec le serveur.");
+    }
+}
+</script>
+{% endblock %}
