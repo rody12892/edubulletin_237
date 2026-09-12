@@ -1,0 +1,28 @@
+steps:
+  # 1. Construction de l'image de conteneur Docker
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['build', '-t', 'gcr.io/$PROJECT_ID/edubulletin_237', '.']
+
+  # 2. Envoi vers le registre de conteneurs Google Cloud
+  - name: 'gcr.io/cloud-builders/docker'
+    args: ['push', 'gcr.io/$PROJECT_ID/edubulletin_237']
+
+  # 3. Déploiement direct sur Google Cloud Run en Belgique
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'edubulletin_237'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/edubulletin_237'
+      - '--region'
+      - 'europe-west1'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--port'
+      - '8080'
+
+images:
+  - 'gcr.io/$PROJECT_ID/edubulletin_237'
