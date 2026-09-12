@@ -7,7 +7,7 @@ from sqlalchemy import (
     create_engine, Column, Integer, String, Float, Boolean, 
     ForeignKey, DateTime, Text, func
 )
-from sqlalchemy.orm import declarative_base, sessionmaker, relationship, Session
+from sqlalchemy.orm import declarative_base, sessionmaker, relationship, Session, synonym
 from sqlalchemy import event
 
 raw_db_url = os.getenv("DATABASE_URL", "").strip()
@@ -160,6 +160,7 @@ class TeacherAssignment(Base):
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     utilisateur_id = Column(Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True)
+    enseignant_id = synonym("utilisateur_id")
     classe_id = Column(Integer, ForeignKey("classes.id", ondelete="CASCADE"), nullable=False, index=True)
     matiere_id = Column(Integer, ForeignKey("subjects.id", ondelete="CASCADE"), nullable=False, index=True)
     

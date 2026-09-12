@@ -537,7 +537,7 @@ async def prof_dashboard(request: Request, user: User = Depends(require_role(["p
     school = db.query(School).filter(School.id == user.ecole_id).first()
     check_school_license(school)
 
-    assignments = db.query(TeacherAssignment).filter(TeacherAssignment.enseignant_id == user.id).all()
+    assignments = db.query(TeacherAssignment).filter(TeacherAssignment.utilisateur_id == user.id).all()
 
     return render_template(request, "prof.html", {
         "request": request,
@@ -556,7 +556,7 @@ async def proposer_coeff(
 ):
     assignment = db.query(TeacherAssignment).filter(
         TeacherAssignment.id == assignment_id,
-        TeacherAssignment.enseignant_id == user.id
+        TeacherAssignment.utilisateur_id == user.id
     ).first()
 
     if not assignment:
