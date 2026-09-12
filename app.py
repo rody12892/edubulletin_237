@@ -75,6 +75,14 @@ def startup_event():
     except Exception as exc:
         logger.error(f"[EDUBULLETIN 237] Erreur demarrage BD: {exc}")
 
+@app.exception_handler(HTTPException)
+async def custom_http_exception_handler(request: Request, exc: HTTPException):
+    """Redirige les requêtes de pages web non authentifiées directement vers /login."""
+    if exc.status_code in [status.HTTP_401_UNAUTHORIZED, status.HTTP_403_FORBIDDEN]:
+        if not request.url.path.startswith("/api/"):
+            return RedirectResponse(f"/login?next={request.url.path}", status_code=status.HTTP_302_FOUND)
+    return JSONResponse(status_code=exc.status_code, content={"detail": exc.detail})
+
 # ==============================================================================
 # ROUTE RACINE & REDIRECTION INTELLIGENTE
 # ==============================================================================
@@ -121,6 +129,94 @@ async def login_page(request: Request, db: Session = Depends(get_db)):
     if user:
         return RedirectResponse("/", status_code=status.HTTP_302_FOUND)
     return render_template(request, "login.html", {"request": request})
+
+@app.post("/login", response_class=HTMLResponse)
+async def login_form_post(
+    request: Request,
+    identifiant: Optional[str] = Form(None),
+    password: Optional[str] = Form(None),
+    db: Session = Depends(get_db)
+):
+    """Gère la soumission directe du formulaire HTML de connexion."""
+    if not identifiant or not password:
+        return render_template(request, "login.html", {
+            "request": request,
+            "error": "Veuillez renseigner votre identifiant et votre mot de passe."
+        })
+
+    user = db.query(User).filter(User.identifiant == identifiant.strip()).first()
+    if not user or not verify_pw(password.strip(), user.mot_de_passe_hash):
+        return render_template(request, "login.html", {
+            "request": request,
+            "error": "Identifiant ou mot de passe incorrect.",
+            "identifiant": identifiant
+        })
+
+    school = db.query(School).filter(School.id == user.ecole_id).first() if user.ecole_id else None
+    check_school_license(school)
+
+    redirect_map = {
+        "superadmin": "/superadmin/overview",
+        "proviseur": "/admin/dashboard",
+        "secretaire": "/secretaire/eleves",
+        "professeur": "/prof/classes",
+        "parent": f"/e/{school.slug if school else 'led'}"
+    }
+    target_url = redirect_map.get(user.role, "/")
+
+    token_data = {
+        "sub": user.id,
+        "email": user.email,
+        "role": user.role,
+        "ecole_id": user.ecole_id
+    }
+    token = create_access_token(token_data)
+
+    resp = RedirectResponse(target_url, status_code=status.HTTP_302_FOUND)
+    resp.set_cookie(
+        key="access_token",
+        value=token,
+        httponly=True,
+        max_age=7 * 24 * 3600,
+        samesite="lax"
+    )
+    return resp
+
+@app.get("/demo/{role_slug}")
+async def demo_quick_login(role_slug: str, db: Session = Depends(get_db)):
+    """Connexion immédiate en 1 clic pour tester chaque rôle sans saisir d'identifiant."""
+    role_map = {
+        "proviseur": ("+237699001122", "/admin/dashboard"),
+        "secretaire": ("+237677112233", "/secretaire/eleves"),
+        "prof": ("+237690112233", "/prof/classes"),
+        "superadmin": ("admin@edubulletin237.cm", "/superadmin/overview")
+    }
+
+    if role_slug not in role_map:
+        raise HTTPException(status_code=404, detail="Rôle de test introuvable.")
+
+    identifiant, target_url = role_map[role_slug]
+    user = db.query(User).filter(User.identifiant == identifiant).first()
+    if not user:
+        raise HTTPException(status_code=404, detail="Compte de test introuvable.")
+
+    token_data = {
+        "sub": user.id,
+        "email": user.email,
+        "role": user.role,
+        "ecole_id": user.ecole_id
+    }
+    token = create_access_token(token_data)
+
+    resp = RedirectResponse(target_url, status_code=status.HTTP_302_FOUND)
+    resp.set_cookie(
+        key="access_token",
+        value=token,
+        httponly=True,
+        max_age=7 * 24 * 3600,
+        samesite="lax"
+    )
+    return resp
 
 class LoginPayload(BaseModel):
     identifiant: str
@@ -237,6 +333,7 @@ async def admin_dashboard(request: Request, user: User = Depends(require_role(["
     return render_template(request, "admin_dashboard.html", {
         "request": request,
         "user": user,
+        "current_user": user,
         "school": school,
         "classes": classes,
         "teachers": teachers,
@@ -350,6 +447,7 @@ async def secretaire_dashboard(request: Request, user: User = Depends(require_ro
     return render_template(request, "secretaire.html", {
         "request": request,
         "user": user,
+        "current_user": user,
         "school": school,
         "classes": classes,
         "students": students
@@ -444,6 +542,7 @@ async def prof_dashboard(request: Request, user: User = Depends(require_role(["p
     return render_template(request, "prof.html", {
         "request": request,
         "user": user,
+        "current_user": user,
         "school": school,
         "assignments": assignments
     })
@@ -569,6 +668,7 @@ async def superadmin_overview(request: Request, user: User = Depends(require_rol
     return render_template(request, "superadmin.html", {
         "request": request,
         "user": user,
+        "current_user": user,
         "schools": schools,
         "transactions": transactions,
         "total_users": total_users,
