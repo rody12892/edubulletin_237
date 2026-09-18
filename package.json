@@ -1,0 +1,10 @@
+{
+  "name": "edubulletin-237",
+  "version": "2.4.1",
+  "description": "Système SaaS Scolaire MINESEC - Cameroun",
+  "private": true,
+  "scripts": {
+    "build": "pip install -r requirements.txt",
+    "start": "uvicorn app:app --host 0.0.0.0 --port 8080"
+  }
+}

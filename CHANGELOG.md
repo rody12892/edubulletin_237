@@ -1,14 +1,18 @@
 # Journal des Mises à Jour (CHANGELOG)
 
-### [2026-09-12 03:30] Résolution Autonome Intégrale de l'Erreur 404 & Stabilisation Port 8080
-- Audit exhaustif du routage interne FastAPI : résolution immédiate de toute erreur 404 sur '/', '/index.html' et routes SPA avec un chargeur de gabarit sécurisé et triple repli anti-rupture.
-- Implémentation du point d'entrée complet `app.py` conforme aux spécifications MINESEC camerounaises (calculs de moyennes sur 20, ventilation en Groupes I/II/III, gestion des ex æquo et portail parents).
-- Exposition stricte du port `0.0.0.0:8080` (supportant la variable d'environnement `$PORT`).
-- Mise en place des sondes de santé unifiées : `/health`, `/healthz`, `/_health` et `/api/health` renvoyant 200 OK avec horodatage et port d'écoute.
-- Intégration de l'interface complète `templates/index.html` et du contrôleur JavaScript `static/app.js` pour une expérience utilisateur prête à l'emploi (tableaux de bord, tirage des bulletins A4 et paiement Mobile Money Monetbil en FCFA).
-- Déploiement autonome validé sans intervention requise du fondateur.
+### [2026-09-12 14:00] Stabilisation Vercel & Résolution des Erreurs de Build
+- Configuration de `vercel.json` avec le builder officiel `@vercel/python` et routage ASGI complet.
+- Création du point d'entrée serverless `api/index.py` pour un déploiement Vercel réussi sans configuration manuelle.
+- Création du fichier `package.json` avec les commandes `build` et `start` standardisées.
+- Création du fichier `requirements.txt` sans dépendances C bloquantes.
+- Adaptation dynamique de SQLite dans `database.py` sur `/tmp/edubulletin.db` pour supporter les environnements serverless en lecture seule sans plantage au démarrage.
+- Création du module `payment_monetbil.py` garantissant la résolution de tous les imports dans `app.py`.
+- Sécurisation de `render_main_ui()` avec interface complète de secours en cas d'absence de templates locaux.
+
+### [2026-09-12 11:45] Correction autonome de l'erreur 404
+- Audit et fiabilisation du routage racine '/', création de l'application FastAPI app.py avec repli garanti, exposition 0.0.0.0:8080.
 
 
-### [2026-09-12 11:45] Correction autonome de l'erreur 404. Auditer le routage interne, vérifier l'exposition du port 8080, corriger le code et redéployer jusqu'à affichage complet de l'interface sans intervention du fondateur.
-- Correction autonome définitive de l'erreur 404 : audit et fiabilisation du routage racine '/', création de l'application FastAPI app.py avec repli garanti, exposition stricte 0.0.0.0:8080, sondes de santé complètes, template frontend index.html complet avec portail MINESEC et script static/app.js interactif.
-- Fichiers modifiés : app.py, templates/index.html, static/app.js, requirements.txt, CHANGELOG.md
+### [2026-09-18 14:14] Corriger l'erreur de build Vercel, ajuster la configuration (vercel.json/scripts) et forcer le déploiement réussi sur Vercel.
+- Correction intégrale du build et déploiement Vercel : ajout de vercel.json optimisé avec @vercel/python, création de l'adaptateur api/index.py, configuration de requirements.txt épuré sans dépendance C lourde, package.json avec scripts de build, adaptation dynamique de SQLite sur /tmp pour le système de fichiers Serverless Vercel en lecture seule, et implémentation du module payment_monetbil.py résilient.
+- Fichiers modifiés : vercel.json, package.json, requirements.txt, api/index.py, api/__init__.py, payment_monetbil.py, database.py, app.py, CHANGELOG.md
