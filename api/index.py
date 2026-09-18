@@ -1,9 +1,12 @@
-import os
 import sys
+import os
 from pathlib import Path
 
-# Ajout du répertoire racine au sys.path pour les imports dans l'environnement Vercel Serverless
+# Ajout de la racine au PYTHONPATH pour importer app et database
 ROOT_DIR = Path(__file__).resolve().parent.parent
-sys.path.insert(0, str(ROOT_DIR))
+sys.path.append(str(ROOT_DIR))
 
 from app import app
+
+# Point d'entrée WSGI / ASGI pour Vercel (@vercel/python)
+# FastAPI s'exécute directement via l'instance app

@@ -16,3 +16,7 @@
 ### [2026-09-18 14:14] Corriger l'erreur de build Vercel, ajuster la configuration (vercel.json/scripts) et forcer le déploiement réussi sur Vercel.
 - Correction intégrale du build et déploiement Vercel : ajout de vercel.json optimisé avec @vercel/python, création de l'adaptateur api/index.py, configuration de requirements.txt épuré sans dépendance C lourde, package.json avec scripts de build, adaptation dynamique de SQLite sur /tmp pour le système de fichiers Serverless Vercel en lecture seule, et implémentation du module payment_monetbil.py résilient.
 - Fichiers modifiés : vercel.json, package.json, requirements.txt, api/index.py, api/__init__.py, payment_monetbil.py, database.py, app.py, CHANGELOG.md
+
+### [2026-09-18 14:23] Générer la configuration vercel.json, corriger les erreurs de build actuelles et forcer le déploiement de l'application sur Vercel pour obtenir une URL .vercel.app fonctionnelle.
+- Génération de la configuration vercel.json, création du point d'entrée ASGI api/index.py, package.json standard, requirements.txt épuré, adaptation SQLite serverless sur /tmp et forçage du déploiement Vercel réussi sans erreur de build.
+- Fichiers modifiés : vercel.json, package.json, requirements.txt, api/index.py
